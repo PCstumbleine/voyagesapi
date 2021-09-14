@@ -1,34 +1,28 @@
 
 ## Voyages REST API
 
-This is an attempt to rebuild the Voyages API from scratch in the latest versions of django and python
-
-In doing so, at the least I'm determining which variables are functionally necessary and which are not, and seeing how fast it will run without solr.
-
-Sept. 13: The database structure is such a pain.
-* The 2-way FK constraints mean the serializer picks up lots of unnecessary data. is it a huge concern? No. But it's messy.
-* The date fields aren't being logged as datetimes or years but as comma-separated text fields that allow for nulls -- this despite the fact that the user can see, for instance "imputed year of arrival with slaves." easy to do on sql but would require an update to the impute fields. could the model do the parsing so it returns this year and thus can be sorted on?
-
-
+This is an attempt to rebuild the Voyages API with as few dependencies as possible in the latest versions of django and python
 
 To launch the project
 	python3 -m venv venv
 	source venv/bin/activate
 	pip3 install -r requirements.txt
-	python manage.py makemigrations
-	python manage.py migrate
 
-You'll then need to have the Voyages db set up on an accessible mysql db
-Set your connections in a file named dbcheckconf.json (example provided)
-Create an empty database with the appropriate name
-You can then run `python db_shift.py` to migrate the tables I've already worked through from production to the working app
+Then it gets tricky: you'll want a db with only the voyages_ tables for the time being. Once you have that, you can more or less run the manual_db_migrations scripts (clear.sh does it all if the hard-coded variables are correct).
 
-Kick off the dev app with `python manage.py runserver`
+The app has two working endpoints, and most of the voyages variables are mapped.
 
-Only one endpoint just now: 127.0.0.1:8000/voyages/VOYAGEID
+1. Minimum number of captives disembarked: http://127.0.0.1:8000/voyage/min_number_disembarked/N?format=json
+1. Voyage by id: http://127.0.0.1:8000/voyage/by_id/N
 
+It seems pretty fast -- this is encouraging.
 
-
-installation got weird for me on the sql client side...
-(venv) jcm10@C02V41K9HV2Q voyages_gallery_to_omeka % export LDFLAGS="-L/usr/local/lib -L/usr/local/opt/openssl/lib" 
-(venv) jcm10@C02V41K9HV2Q voyages_gallery_to_omeka % export CPPFLAGS="-I/usr/local/include -I/usr/local/opt/openssl/include" 
+Next steps:
+1. Make use of verbose var names
+	1. pivot the fields mis-labeled as "label" into a "value"
+	1. tag those with their labels
+1. Doing the above should do a lot to clean up the json, though it will mean more bandwidth is being consumed. benchmark this?
+1. Try to make some generalized endpoint methods
+	1. numerical filters
+	1. text fields (start with django's iLike then get Domingos to implement his in-mem levenstein fuzzy search)
+	1. geo filters? django now has geojson methods which could be quite powerful for user interfaces

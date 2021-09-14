@@ -67,7 +67,11 @@ d.close()
 
 t=re.sub("[ \t\r\f\v]","",t)
 tables=t.split("\n\n")
+tables=[t for t in tables if t!='']
 foreign_key_constraints=[]
+
+
+
 #drop foreign key constraints
 FK_CONSTRAINTS=[]
 for table in tables:
@@ -87,8 +91,8 @@ for table in tables:
 			entry=[source_table]+list(table_fk_constraint)
 			#print(entry)
 			FK_CONSTRAINTS.append(entry)
-print(new_db)
-print(FK_CONSTRAINTS)
+#print(new_db)
+#print(FK_CONSTRAINTS)
 
 for fkc in FK_CONSTRAINTS:
 	source_table,constraint_id,source_column,target_table,target_column=fkc
@@ -96,18 +100,11 @@ for fkc in FK_CONSTRAINTS:
 	print(q)
 	cursor.execute(q)
 	cnx.commit()
-	
-
-'''>>> m = re.match(r'(?P<first>\w+) (?P<last>\w+)', 'Jane Doe')
->>> m.groupdict()
-{'first': 'Jane', 'last': 'Doe'}'''
-
-'''CONSTRAINT `voyage_slaves_numbers_id_refs_id_d1f96dfe` FOREIGN KEY (`voyage_slaves_numbers_id`) REFERENCES `voyage_voyageslavesnumbers` (`id`)
-alter table voyage_voyage drop foreign key `voyage_crew_id_refs_id_a1cd3a09`;
-alter table voyage_voyage add foreign key (`voyage_slaves_numbers_id`) REFERENCES `voyage_voyageslavesnumbers` (`id`);
 
 
-#now drop table
+
+
+#now shift table entries
 for table in tables:
 	
 	oldtable,newtable=table.split('\n')[0].split(',')
@@ -116,7 +113,12 @@ for table in tables:
 
 
 #now reinforce constraints'''
-
+for fkc in FK_CONSTRAINTS:
+	source_table,constraint_id,source_column,target_table,target_column=fkc
+	q='alter table %s.%s add constraint %s foreign key (%s) references %s (%s);' %(new_db,source_table,constraint_id,source_column,target_table,target_column)
+	print(q)
+	cursor.execute(q)
+	cnx.commit()
 
 cnx.close()
 

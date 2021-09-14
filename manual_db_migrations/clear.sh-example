@@ -3,4 +3,6 @@ mysql -u root -pPASSWORD -e "create database voyages;"
 mysql -u root -pPASSWORD -e "drop schema voyages_staging;"
 mysql -u root -pPASSWORD -e "create database voyages_staging;"
 mysql -u root -pPASSWORD voyages_staging < ../../../past_voyagestablesonly.sql
+python db_pull.py
 python ../manage.py migrate
+python db_shift.py

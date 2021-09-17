@@ -406,7 +406,7 @@ class VoyageOutcome(models.Model):
 							   blank=True,
 							   related_name="voyage_name_outcome",
 							   on_delete=models.CASCADE)
-
+	
 	def __unicode__(self):
 		# TODO: We may want to change this.
 		return "Outcome"
@@ -1762,6 +1762,14 @@ class Voyage(models.Model):
 		null=True,
 		related_name='voyage_slaves_numbers',
 		on_delete=models.CASCADE)
+	
+	voyage_outcome = models.ForeignKey(
+		'VoyageOutcome',
+		blank=True,
+		null=True,
+		related_name='voyage_outcome',
+		on_delete=models.CASCADE
+	)
 
 	voyage_captain = models.ManyToManyField("VoyageCaptain",
 											through='VoyageCaptainConnection',
@@ -1772,7 +1780,7 @@ class Voyage(models.Model):
 		through='VoyageShipOwnerConnection',
 		help_text="Voyage Ship Owner",
 		blank=True)
-
+	
 	# One Voyage can contain multiple sources and one source can refer
 	# to multiple voyages
 	voyage_sources = models.ManyToManyField('VoyageSources',

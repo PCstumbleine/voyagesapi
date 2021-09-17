@@ -1667,13 +1667,13 @@ class VoyageSourcesConnection(models.Model):
 	related to: :class:`~voyages.apps.voyage.models.Voyage`
 	"""
 	source = models.ForeignKey('VoyageSources',
-							   related_name="source",
+							   related_name="voyage_sources",
 							   null=False,
 							   blank=True,
 							   on_delete=models.CASCADE)
-	group = models.ForeignKey('Voyage', related_name="group",
+	group = models.ForeignKey('Voyage', related_name="source_groups",
 							  on_delete=models.CASCADE)
-	source_order = models.IntegerField()
+	#source_order = models.IntegerField()
 	text_ref = models.CharField(_('Text reference(citation)'),
 								max_length=255, null=False, blank=True)
 
@@ -1777,7 +1777,7 @@ class Voyage(models.Model):
 	# to multiple voyages
 	voyage_sources = models.ManyToManyField('VoyageSources',
 											through='VoyageSourcesConnection',
-											related_name='voyage_sources',
+											related_name='sources',
 											blank=True)
 
 	last_update = models.DateTimeField(auto_now=True)

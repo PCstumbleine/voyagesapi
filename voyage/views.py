@@ -11,6 +11,25 @@ from .serializers import VoyageSerializer
 
 defaultlimit=10
 
+'''class VoyageSourcesConnectionByID(APIView):
+
+	def get(self,request,id):
+	
+		#this is just a test -- presupposing only a voyage id column
+		if id:
+			try:
+				queryset=VoyageSourcesConnection.objects.get(id=id)
+			except VoyageSourcesConnection.DoesNotExist:
+				return Response({'error': 'voyage source connection does not exist'},status=400)
+			read_serializer = VoyageSourcesConnectionSerializer(queryset)
+		
+		else:		
+			queryset=VoyageSourcesConnection.objects.all().values()
+			read_serializer=VoyageSourcesConnectionSerializer(queryset,many=True)
+
+		return Response(read_serializer.data)'''
+
+
 class VoyageByID(APIView):
 
 	def get(self,request,id):

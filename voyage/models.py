@@ -1769,14 +1769,6 @@ class Voyage(models.Model):
 		related_name='voyage_slaves_numbers',
 		on_delete=models.CASCADE)
 	
-	'''voyage_outcome = models.ForeignKey(
-		'VoyageOutcome',
-		blank=True,
-		null=True,
-		related_name='voyage_outcome',
-		on_delete=models.CASCADE
-	)'''
-
 	voyage_captain = models.ManyToManyField("VoyageCaptain",
 											through='VoyageCaptainConnection',
 											help_text="Voyage Captain",

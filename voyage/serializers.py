@@ -24,6 +24,8 @@ class serializers.ModelSerializer(serializers.ModelSerializer):
 ##### GEO DATA ##### 
 
 class RegionSerializer(serializers.ModelSerializer):
+	
+	
 	class Meta:
 		model=Region
 		fields=('__all__')
@@ -135,19 +137,14 @@ class ResistanceSerializer(serializers.ModelSerializer):
 		fields=('__all__')
 
 class VoyageOutcomeSerializer(serializers.ModelSerializer):
-	'''outcome_owner=OwnerOutcomeSerializer()
+	outcome_owner=OwnerOutcomeSerializer()
 	outcome_slaves=SlavesOutcomeSerializer()
 	particular_outcome=ParticularOutcomeSerializer()
 	resistance=ResistanceSerializer()
-	vessel_captured_outcome=VesselCapturedOutcomeSerializer()'''
+	vessel_captured_outcome=VesselCapturedOutcomeSerializer()
 	class Meta:
 		model=VoyageOutcome
 		fields=('__all__')
-		depth=2
-
-
-
-
 
 
 
@@ -192,7 +189,6 @@ class VoyageSourcesSerializer(serializers.ModelSerializer):
 	class Meta:
 		model=VoyageSources
 		fields=('__all__')
-		
 
 
 class VoyageSerializer(serializers.ModelSerializer):
@@ -206,7 +202,7 @@ class VoyageSerializer(serializers.ModelSerializer):
 	voyage_ship_owner=VoyageShipOwnerSerializer(many=True,read_only=True)
 	voyage_slaves_numbers=VoyageSlavesNumbersSerializer()
 	voyage_itinerary=VoyageItinerarySerializer()
-	voyage_name_outcome=VoyageOutcomeSerializer()
+	voyage_outcomes=VoyageOutcomeSerializer(many=True,read_only=True)
 	class Meta:
 		model=Voyage
 		fields=('__all__')

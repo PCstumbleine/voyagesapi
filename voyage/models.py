@@ -404,12 +404,18 @@ class VoyageOutcome(models.Model):
 	voyage = models.ForeignKey('Voyage',
 							   null=True,
 							   blank=True,
-							   related_name="voyage_name_outcome",
+							   related_name="voyage_outcomes",
 							   on_delete=models.CASCADE)
 	
 	def __unicode__(self):
 		# TODO: We may want to change this.
-		return "Outcome"
+		#return "Outcome"
+		return '%d %d %d %d' %(
+				self.particular_outcome,
+				self.resistance,
+				self.outcome_slaves,
+				self.vessel_captured_outcome
+				)
 
 	class Meta:
 		verbose_name = "Outcome"
@@ -1763,13 +1769,13 @@ class Voyage(models.Model):
 		related_name='voyage_slaves_numbers',
 		on_delete=models.CASCADE)
 	
-	voyage_outcome = models.ForeignKey(
+	'''voyage_outcome = models.ForeignKey(
 		'VoyageOutcome',
 		blank=True,
 		null=True,
 		related_name='voyage_outcome',
 		on_delete=models.CASCADE
-	)
+	)'''
 
 	voyage_captain = models.ManyToManyField("VoyageCaptain",
 											through='VoyageCaptainConnection',

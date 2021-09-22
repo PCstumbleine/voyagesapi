@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 from builtins import str
 
 from django.db import models
-#from django.db.models import Prefetch
+from django.db.models import Prefetch
 from django.utils.translation import ugettext as _
 
 from common.validators import date_csv_field_validator
@@ -1817,7 +1817,7 @@ class Voyage(models.Model):
 		return "Voyage #%s" % str(self.voyage_id)
 
 
-'''class VoyagesFullQueryHelper:
+class VoyagesFullQueryHelper:
 
 	def __init__(self):
 		# Here we prefetch lots of relations to avoid generating
@@ -1858,6 +1858,10 @@ class Voyage(models.Model):
 		]
 
 		self.prefetch_fields = [
+			Prefetch(
+				'voyage_dates__imp_length_home_to_disembark',
+				to_attr='voyage_dates__imp_length_home_to_disembark'
+				),
 			Prefetch('voyage_captain',
 					 queryset=VoyageCaptain.objects.order_by(
 						 'captain_name__captain_order')),
@@ -1904,4 +1908,3 @@ class Voyage(models.Model):
 		return self.get_manager(dataset).select_related(
 			*list(self.related_models.keys())).prefetch_related(
 				*self.prefetch_fields).all()
-'''

@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from django.db.models import Q
+from django.db.models import Q,Prefetch
 from django.http import HttpResponse, JsonResponse
 from rest_framework.views import APIView
 from rest_framework import generics
@@ -42,16 +42,11 @@ class VoyageList(APIView):
 		#FIELD SELECTION
 		## selected_fields
 		### this is important because responses can quickly become large enough (not on the SQL side but on spitting them back out) to dramatically slow the response time
-		default_query_fields='__all__'
-		selected_fields=params.get('selected_query_fields')
+		selected_fields=params.get('selected_fields')
 		if selected_fields!=None:
 			selected_query_fields=(i for i in selected_fields.split(','))
 		else:
-			selected_query_fields=default_query_fields
-		
-		#now we just have to enumerate our varibles and build filters for them.
-		voyage_ids=params.get('voyage_ids')
-		
+			selected_query_fields=None
 		
 		#PAGINATION
 		## results_per_page
@@ -80,10 +75,27 @@ class VoyageList(APIView):
 		#on stacking query vars: https://docs.djangoproject.com/en/3.2/topics/db/queries/#querysets-are-lazy
 		queryset=Voyage.objects.all()
 
-		####VOYAGE_ID (comma-delimited integers)
+		####VOYAGE_ID COMMA-SEPARATED INTEGERS
+		#now we just have to enumerate our varibles and build filters for them.
+		voyage_ids=params.get('voyage_ids')
 		if voyage_ids!=None:
-			voyage_id=[i for i in voyage_ids.split(',')]
+			voyage_id=[int(i) for i in voyage_ids.split(',')]
 			queryset = queryset.filter(voyage_id__in=voyage_id)
+		
+		####DATES
+		
+		##imp_length_home_to_disembark: TWO INTEGERS, COMMA-SEPARATED
+		imp_length_home_to_disembark=params.get('imp_length_home_to_disembark')
+		if imp_length_home_to_disembark!=None:
+			imp_length_home_to_disembark=[int(i) for i in imp_length_home_to_disembark.split(',')]
+			queryset = queryset.filter(voyage_dates__imp_length_home_to_disembark__lte=max(imp_length_home_to_disembark))
+			queryset = queryset.filter(voyage_dates__imp_length_home_to_disembark__gte=min(imp_length_home_to_disembark))
+		
+		
+		
+		
+		
+		
 		
 		
 		

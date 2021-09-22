@@ -1,53 +1,66 @@
 from rest_framework import serializers
 from rest_framework.fields import SerializerMethodField
-
+import re
 from .models import *
 
 
 
-#Use this to layer in the reader-friendly table labels
-class modellabel(serializers.ModelSerializer):
-	def __init__(self):
-		super(serializers.ModelSerializer, self)
-		self.fields['label'] = SerializerMethodField()
-		self.fields['name'] = SerializerMethodField()
-	def get_label(self):
-		return self.Meta.model._meta.verbose_name
-	def get_value(self):
-		return self.name
+
+
+
+
+
+
+
+##We want a means of extracting out of every field
+###name
+###label
+###type
+####if numeric:
+####min_value
+####max_value
+####if not, some placeholder search function until we can plug in domingos' levenstein search cache for text fields
+
+###VoyageSerializer.Meta.model._meta.verbose_name
+###VoyageSerializer.Meta.model.get_deferred_fields
+###VoyageSerializer.Meta.model.get_fields
+
 
 
 
 
 #https://www.django-rest-framework.org/api-guide/serializers/#dynamically-modifying-fields
 class DynamicFieldsModelSerializer(serializers.ModelSerializer):
-    """
-    A ModelSerializer that takes an additional `fields` argument that
-    controls which fields should be displayed.
-    """
+	"""
+	A ModelSerializer that takes an additional `fields` argument that
+	controls which fields should be displayed.
+	"""
 
-    def __init__(self, *args, **kwargs):
-        # Don't pass the 'fields' arg up to the superclass
-        fields = kwargs.pop('fields', None)
+	def __init__(self, *args, **kwargs):
+		# Don't pass the 'fields' arg up to the superclass
+		fields = kwargs.pop('fields', None)
+		
+		'''#got my hooks into the fields' data.
+		#now have to push it back into an object for serialization, but only when requested
+		for f in self.fields:
+			print(f,self.fields[f].label)
+			try:
+				for sf in self.fields[f]:
+					#print(sf.__dict__)
+					print('+',sf.name,'+',sf.label,'+',sf._field)
+			except:
+				pass'''
 
-        # Instantiate the superclass normally
-        super(DynamicFieldsModelSerializer, self).__init__(*args, **kwargs)
-
-        if fields is not None:
-            # Drop any fields that are not specified in the `fields` argument.
-            allowed = set(fields)
-            existing = set(self.fields)
-            for field_name in existing - allowed:
-                self.fields.pop(field_name)
-
-
-
-
-
-
-
-
-
+		# Instantiate the superclass normally
+		super(DynamicFieldsModelSerializer, self).__init__(*args, **kwargs)
+		
+		print(fields)
+		if fields is not None:
+			# Drop any fields that are not specified in the `fields` argument.
+			allowed = set(fields)
+			existing = set(self.fields)
+			for field_name in existing - allowed:
+				self.fields.pop(field_name)
 
 
 ##### GEO DATA ##### 
@@ -72,6 +85,9 @@ class PlaceSerializer(serializers.ModelSerializer):
 ##### NUMBERS DATA ##### 
 
 class VoyageSlavesNumbersSerializer(serializers.ModelSerializer):
+	def __init__(self):
+		print(self.get_fields)
+	
 	class Meta:
 		model=VoyageSlavesNumbers
 		fields=('__all__')
@@ -148,6 +164,7 @@ class VoyageOutcomeSerializer(serializers.ModelSerializer):
 ##### GROUPINGS ##### 
 
 class VoyageGroupingsSerializer(serializers.ModelSerializer):
+	
 	class Meta:
 		model=VoyageGroupings
 		fields=('__all__')
@@ -183,7 +200,7 @@ class VoyageShipOwnerSerializer(serializers.ModelSerializer):
 		fields=('name',)
 
 
-#This would be an interesting way of doing it -- presenting each entity in a simple "vale"/"label" pair
+#This would be an interesting way of doing it -- presenting each entity in a simple "value"/"label" pair
 #Would allow for totally ignorant apps to hit this thing and present it in a readable way
 #But it's less data-heavy to give a flatter representation instead, I think, so I'm going for the slugs
 '''class VoyageShipOwnerSerializer(serializers.ModelSerializer):
@@ -224,6 +241,7 @@ class VoyageSerializer(DynamicFieldsModelSerializer):
 		fields='__all__'
 
 
-
 	
+
+
 

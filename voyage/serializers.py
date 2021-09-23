@@ -39,10 +39,11 @@ class DynamicFieldsModelSerializer(serializers.ModelSerializer):
 	def __init__(self, *args, **kwargs):
 		# Don't pass the 'fields' arg up to the superclass
 		fields = kwargs.pop('fields', None)
-		
-		'''#got my hooks into the fields' data.
+		print(self.Meta.model._meta.verbose_name,"+++++++++++++++++++++++++",fields)
+		#print("ROOT---->",self.root)
+		#got my hooks into the fields' data.
 		#now have to push it back into an object for serialization, but only when requested
-		for f in self.fields:
+		'''for f in self.fields:
 			print(f,self.fields[f].label)
 			try:
 				for sf in self.fields[f]:
@@ -54,13 +55,15 @@ class DynamicFieldsModelSerializer(serializers.ModelSerializer):
 		# Instantiate the superclass normally
 		super(DynamicFieldsModelSerializer, self).__init__(*args, **kwargs)
 		
-		print(fields)
 		if fields is not None:
 			# Drop any fields that are not specified in the `fields` argument.
 			allowed = set(fields)
 			existing = set(self.fields)
 			for field_name in existing - allowed:
 				self.fields.pop(field_name)
+			self.selected_fields=allowed
+
+
 
 
 ##### GEO DATA ##### 
@@ -116,16 +119,17 @@ class VoyageShipSerializer(serializers.ModelSerializer):
 		exclude=('id','voyage')
 
 
+
+
+
+
+
+
+
+
 ##### DATES, NUMBERS, ITINERARY ##### 
 
-class VoyageDatesSerializer(serializers.ModelSerializer):
-	arrival_year=serializers.SerializerMethodField('get_arrival_year')
-	def get_arrival_year(self,d):
-		return d.get_date_year(d.imp_arrival_at_port_of_dis)
-	
-	class Meta:
-		model=VoyageDates
-		exclude=('id','voyage')
+
 
 class VoyageSlavesNumbersSerializer(serializers.ModelSerializer):
 	class Meta:
@@ -143,9 +147,13 @@ class VoyageItinerarySerializer(serializers.ModelSerializer):
 
 
 
+
+
+
+
+
+
 ##### OUTCOMES #####
-
-
 
 class VoyageOutcomeSerializer(serializers.ModelSerializer):
 	outcome_owner=serializers.SlugRelatedField(slug_field='label',read_only='True')
@@ -164,11 +172,9 @@ class VoyageOutcomeSerializer(serializers.ModelSerializer):
 ##### GROUPINGS ##### 
 
 class VoyageGroupingsSerializer(serializers.ModelSerializer):
-	
 	class Meta:
 		model=VoyageGroupings
 		fields=('__all__')
-
 
 ##### CREW, CAPTAIN, OWNER ##### 
 
@@ -224,8 +230,30 @@ class VoyageSourcesSerializer(serializers.ModelSerializer):
 		fields=('full_ref','source_type')
 
 
+
+
+
+
+class VoyageDatesSerializer(DynamicFieldsModelSerializer):
+	arrival_year=serializers.SerializerMethodField('get_arrival_year')
+	def get_arrival_year(self,obj):
+		print(obj)
+		return obj.get_date_year(obj.imp_arrival_at_port_of_dis)
+	class Meta:
+		model=VoyageDates
+		exclude=('id','voyage')
+
+
+
+
+
+
 class VoyageSerializer(DynamicFieldsModelSerializer):
-	#id = serializers.Field()
+	
+	
+	##I need to find a way to pass the fields into these nested serializers, to be able to filter sub-fields
+	##In the meantime, we can at least filter on the categories...
+	
 	voyage_dates=VoyageDatesSerializer()
 	voyage_ship=VoyageShipSerializer()
 	voyage_groupings=serializers.SlugRelatedField(slug_field='label',read_only='True')
@@ -235,13 +263,24 @@ class VoyageSerializer(DynamicFieldsModelSerializer):
 	voyage_ship_owner=VoyageShipOwnerSerializer(many=True,read_only=True)
 	voyage_slaves_numbers=VoyageSlavesNumbersSerializer()
 	voyage_itinerary=VoyageItinerarySerializer()
-	voyage_outcomes=VoyageOutcomeSerializer(many=True,read_only=True)
+	voyage_outcomes=VoyageOutcomeSerializer(many=True,read_only=True)	
+	
 	class Meta:
 		model=Voyage
 		fields='__all__'
+		
+	def get_queryset(self):
+		queryset.prefetch_related("voyage_dates__imp_length_home_to_disembark")
+		queryset.prefetch_related("voyage_dates__imp_length_leaving_africa_to_disembark")
+		return queryset
 
 
-	
+
+
+
+
+
+#i for i in self.selected_fields
 
 
 

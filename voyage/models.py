@@ -1817,7 +1817,7 @@ class Voyage(models.Model):
 		return "Voyage #%s" % str(self.voyage_id)
 
 
-class VoyagesFullQueryHelper:
+'''class VoyagesFullQueryHelper:
 
 	def __init__(self):
 		# Here we prefetch lots of relations to avoid generating
@@ -1908,3 +1908,4 @@ class VoyagesFullQueryHelper:
 		return self.get_manager(dataset).select_related(
 			*list(self.related_models.keys())).prefetch_related(
 				*self.prefetch_fields).all()
+'''

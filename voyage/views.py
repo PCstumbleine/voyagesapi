@@ -85,21 +85,17 @@ class VoyageList(APIView):
 		####DATES
 		
 		##imp_length_home_to_disembark: TWO INTEGERS, COMMA-SEPARATED
-		imp_length_home_to_disembark=params.get('imp_length_home_to_disembark')
+		imp_length_home_to_disembark=params.get('voyage_dates__imp_length_home_to_disembark')
 		if imp_length_home_to_disembark!=None:
 			imp_length_home_to_disembark=[int(i) for i in imp_length_home_to_disembark.split(',')]
 			queryset = queryset.filter(voyage_dates__imp_length_home_to_disembark__lte=max(imp_length_home_to_disembark))
 			queryset = queryset.filter(voyage_dates__imp_length_home_to_disembark__gte=min(imp_length_home_to_disembark))
 		
-		
-		
-		
-		
-		
-		
-		
-		
-		
+		imp_length_leaving_africa_to_disembark=params.get('voyage_dates__imp_length_leaving_africa_to_disembark')
+		if imp_length_leaving_africa_to_disembark!=None:
+			imp_length_leaving_africa_to_disembark=[int(i) for i in imp_length_leaving_africa_to_disembark.split(',')]
+			queryset = queryset.filter(voyage_dates__imp_length_leaving_africa_to_disembark__lte=max(imp_length_leaving_africa_to_disembark))
+			queryset = queryset.filter(voyage_dates__imp_length_leaving_africa_to_disembark__gte=min(imp_length_leaving_africa_to_disembark))
 		
 		
 		read_serializer=VoyageSerializer(queryset[start_idx:end_idx],many=True,fields=selected_query_fields)

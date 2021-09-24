@@ -84,6 +84,26 @@ class VoyageList(APIView):
 		
 		####DATES
 		
+		
+		
+				
+		'''fields=[
+			'voyage_dates__imp_length_home_to_disembark',
+			'voyage_dates__imp_length_leaving_africa_to_disembark'
+			]
+		for field in fields:
+			max,min=[int(i) for i in params.get(field).split(',')]
+			kwargs = {
+			'{0}__{1}'.format(field, 'lte'): max,
+			'{0}__{1}'.format(field, 'gte'): min
+			}
+			queryset=queryset.filter(**kwargs)'''
+
+
+		
+		
+		
+		
 		##imp_length_home_to_disembark: TWO INTEGERS, COMMA-SEPARATED
 		imp_length_home_to_disembark=params.get('voyage_dates__imp_length_home_to_disembark')
 		if imp_length_home_to_disembark!=None:
@@ -98,6 +118,9 @@ class VoyageList(APIView):
 			queryset = queryset.filter(voyage_dates__imp_length_leaving_africa_to_disembark__gte=min(imp_length_leaving_africa_to_disembark))
 		
 		
-		read_serializer=VoyageSerializer(queryset[start_idx:end_idx],many=True,fields=selected_query_fields)
+		read_serializer=VoyageSerializer(queryset[start_idx:end_idx],many=True,selected_fields=selected_query_fields)
+		
+		def get_serializer_context(self):
+			return {'request': self.request}
 		
 		return JsonResponse(read_serializer.data,safe=False)

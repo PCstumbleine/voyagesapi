@@ -38,32 +38,27 @@ class DynamicFieldsModelSerializer(serializers.ModelSerializer):
 
 	def __init__(self, *args, **kwargs):
 		# Don't pass the 'fields' arg up to the superclass
-		fields = kwargs.pop('fields', None)
-		print(self.Meta.model._meta.verbose_name,"+++++++++++++++++++++++++",fields)
+		selected_fields = kwargs.pop('selected_fields', None)
+		if selected_fields is None:
+			pass
+			#selected_fields=self.selected_fields
+		else:
+			print(self.Meta.model._meta.verbose_name,"+++++++++++++++++++++++++",selected_fields)
+			print("-->",selected_fields)
 		#print("ROOT---->",self.root)
 		#got my hooks into the fields' data.
 		#now have to push it back into an object for serialization, but only when requested
-		'''for f in self.fields:
-			print(f,self.fields[f].label)
-			try:
-				for sf in self.fields[f]:
-					#print(sf.__dict__)
-					print('+',sf.name,'+',sf.label,'+',sf._field)
-			except:
-				pass'''
-
 		# Instantiate the superclass normally
 		super(DynamicFieldsModelSerializer, self).__init__(*args, **kwargs)
 		
-		if fields is not None:
+		
+		if selected_fields is not None:
 			# Drop any fields that are not specified in the `fields` argument.
-			allowed = set(fields)
+			allowed = set(selected_fields)
 			existing = set(self.fields)
 			for field_name in existing - allowed:
 				self.fields.pop(field_name)
-			self.selected_fields=allowed
-
-
+			self.selected_fields=list(allowed)
 
 
 ##### GEO DATA ##### 
@@ -235,14 +230,25 @@ class VoyageSourcesSerializer(serializers.ModelSerializer):
 
 
 class VoyageDatesSerializer(DynamicFieldsModelSerializer):
-	arrival_year=serializers.SerializerMethodField('get_arrival_year')
+	'''arrival_year=serializers.SerializerMethodField('get_arrival_year')
 	def get_arrival_year(self,obj):
-		print(obj)
-		return obj.get_date_year(obj.imp_arrival_at_port_of_dis)
+		#print(obj)
+		return obj.get_date_year(obj.imp_arrival_at_port_of_dis)'''
+	
+	#def to_representation(self, instance):
+	def __init__(self,d):
+		print(self.parent.selected_fields)
+		#self.selected_fields
+		print("why not")
+		#print(self.parent.selected_fields)
+		#self.selected_fields=self.parent.selected_fields
+		#print(self.selected_fields)
+	
+		
 	class Meta:
 		model=VoyageDates
 		exclude=('id','voyage')
-
+	
 
 
 
@@ -253,8 +259,9 @@ class VoyageSerializer(DynamicFieldsModelSerializer):
 	
 	##I need to find a way to pass the fields into these nested serializers, to be able to filter sub-fields
 	##In the meantime, we can at least filter on the categories...
-	
+	#voyage_dates=serializers.ListField(read_only=True, child=VoyageDatesSerializer())
 	voyage_dates=VoyageDatesSerializer()
+	#voyage_dates=SerializerMethodField()
 	voyage_ship=VoyageShipSerializer()
 	voyage_groupings=serializers.SlugRelatedField(slug_field='label',read_only='True')
 	voyage_crew=VoyageCrewSerializer()
@@ -265,6 +272,9 @@ class VoyageSerializer(DynamicFieldsModelSerializer):
 	voyage_itinerary=VoyageItinerarySerializer()
 	voyage_outcomes=VoyageOutcomeSerializer(many=True,read_only=True)	
 	
+	def test(self):
+		print(self._context)
+	
 	class Meta:
 		model=Voyage
 		fields='__all__'
@@ -273,14 +283,13 @@ class VoyageSerializer(DynamicFieldsModelSerializer):
 		queryset.prefetch_related("voyage_dates__imp_length_home_to_disembark")
 		queryset.prefetch_related("voyage_dates__imp_length_leaving_africa_to_disembark")
 		return queryset
-
-
-
-
-
-
-
-#i for i in self.selected_fields
-
-
-
+	
+	'''def __init__(self, *args, **kwargs):
+		super().__init__(*args, **kwargs)
+		print('TOP LEVEL CONTEXT',kwargs)
+		# We pass the "upper serializer" context to the "nested one"
+		self.fields['voyage_dates'].context.update(kwargs)'''
+	
+	'''def get_voyage_dates(self,obj):
+		return VoyageDatesSerializer(obj.VoyageDates.all(), many=True, selected_fields=self.selected_fields).data'''
+	

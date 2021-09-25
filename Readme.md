@@ -18,11 +18,7 @@ The app has two working endpoints, and most of the voyages variables are mapped.
 It seems pretty fast -- this is encouraging.
 
 Next steps:
-1. Make use of verbose var names
-	1. pivot the fields mis-labeled as "label" into a "value"
-	1. tag those with their labels
-1. Doing the above should do a lot to clean up the json, though it will mean more bandwidth is being consumed. benchmark this?
-1. Try to make some generalized endpoint methods
-	1. numerical filters
-	1. text fields (start with django's iLike then get Domingos to implement his in-mem levenstein fuzzy search)
-	1. geo filters? django now has geojson methods which could be quite powerful for user interfaces
+1. Make a schema of nested, serialized variables' metadata available as an endpoint
+1. Present long-form data, fully searchable, with basic nested serializers
+1. Create an interface that uses both to display human-readable labels for interactive variables (so a searchable table is the basic form of this)
+1. Begin to refine views by focusing in on subsets of the data (like numerical data, or names, or geographic regions)

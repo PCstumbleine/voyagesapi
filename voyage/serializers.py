@@ -39,26 +39,27 @@ class DynamicFieldsModelSerializer(serializers.ModelSerializer):
 	def __init__(self, *args, **kwargs):
 		# Don't pass the 'fields' arg up to the superclass
 		selected_fields = kwargs.pop('selected_fields', None)
-		if selected_fields is None:
+		'''if selected_fields is None:
 			pass
 			#selected_fields=self.selected_fields
 		else:
 			print(self.Meta.model._meta.verbose_name,"+++++++++++++++++++++++++",selected_fields)
-			print("-->",selected_fields)
-		#print("ROOT---->",self.root)
+			print("-->",selected_fields)'''
 		#got my hooks into the fields' data.
 		#now have to push it back into an object for serialization, but only when requested
 		# Instantiate the superclass normally
 		super(DynamicFieldsModelSerializer, self).__init__(*args, **kwargs)
 		
 		
+		
 		if selected_fields is not None:
+			#print(self)
 			# Drop any fields that are not specified in the `fields` argument.
 			allowed = set(selected_fields)
 			existing = set(self.fields)
 			for field_name in existing - allowed:
 				self.fields.pop(field_name)
-			self.selected_fields=list(allowed)
+			#self.selected_fields=list(allowed)
 
 
 ##### GEO DATA ##### 
@@ -235,14 +236,14 @@ class VoyageDatesSerializer(DynamicFieldsModelSerializer):
 		#print(obj)
 		return obj.get_date_year(obj.imp_arrival_at_port_of_dis)'''
 	
-	#def to_representation(self, instance):
+	'''#def to_representation(self, instance):
 	def __init__(self,d):
 		print(self.parent.selected_fields)
 		#self.selected_fields
 		print("why not")
 		#print(self.parent.selected_fields)
 		#self.selected_fields=self.parent.selected_fields
-		#print(self.selected_fields)
+		#print(self.selected_fields)'''
 	
 		
 	class Meta:
@@ -252,14 +253,31 @@ class VoyageDatesSerializer(DynamicFieldsModelSerializer):
 
 
 
+'''
+#This is the closest they DRF folks seem to have come to what we really need here: https://github.com/encode/django-rest-framework/issues/1985
+class VoyageDatePKField(serializers.PrimaryKeyRelatedField):
+	def get_queryset(self):
+		voyage_dates__imp_length_home_to_disembark=self.context['request'].voyage_dates__imp_length_home_to_disembark
+		queryset = Voyage.objects.filter(voyage_dates__imp_length_home_to_disembark__)
+'''
+
+
 
 
 class VoyageSerializer(DynamicFieldsModelSerializer):
 	
 	
 	##I need to find a way to pass the fields into these nested serializers, to be able to filter sub-fields
+	###This is the closest they DRF folks seem to have come to it: https://github.com/encode/django-rest-framework/issues/1985
+	###So it does demand a custom solution.
+	###This document, then, will be the base mode, in which we present the long-form data and allow you to search on all of it.
+	#####After that, I can make custom serializer classes that focus in on particular facets of the data.
+	#####For instance, stats-oriented serializer classes that quickly analyze the numerical data, or names, or geographical regions.
+	###But, ideally, it would be possible to nest serializers and pass them a list of fields to dynamically restrict the display of, in the way that one can filter a queryset with a keyword argument.
 	##In the meantime, we can at least filter on the categories...
 	#voyage_dates=serializers.ListField(read_only=True, child=VoyageDatesSerializer())
+	#kw_args=SerializerMethodField()
+	#kw_args.get_value(self,'selected_fields')
 	voyage_dates=VoyageDatesSerializer()
 	#voyage_dates=SerializerMethodField()
 	voyage_ship=VoyageShipSerializer()
@@ -272,13 +290,16 @@ class VoyageSerializer(DynamicFieldsModelSerializer):
 	voyage_itinerary=VoyageItinerarySerializer()
 	voyage_outcomes=VoyageOutcomeSerializer(many=True,read_only=True)	
 	
-	def test(self):
-		print(self._context)
-	
+	 
 	class Meta:
 		model=Voyage
 		fields='__all__'
 		
+	'''def get_kw_args(self,d):
+		def __init__(self,d):
+			print(self.selected_fields)
+		return ['voyage_dates']'''
+	
 	def get_queryset(self):
 		queryset.prefetch_related("voyage_dates__imp_length_home_to_disembark")
 		queryset.prefetch_related("voyage_dates__imp_length_leaving_africa_to_disembark")

@@ -238,7 +238,7 @@ class VoyageShip(models.Model):
 											on_delete=models.CASCADE)
 	tonnage_mod = models.DecimalField(
 		"Tonnage standardized on British"
-		"measured tons, 1773-1870",
+		" measured tons 1773-1870",
 		max_digits=8,
 		decimal_places=1,
 		null=True,

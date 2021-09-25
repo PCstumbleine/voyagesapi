@@ -8,17 +8,35 @@ To launch the project
 	source venv/bin/activate
 	pip3 install -r requirements.txt
 
-Then it gets tricky: you'll want a db with only the voyages_ tables for the time being. Once you have that, you can more or less run the manual_db_migrations scripts (clear.sh does it all if the hard-coded variables are correct).
 
-The app has two working endpoints, and most of the voyages variables are mapped.
+The app has one working endpoint, but it's quite flexible.
 
-1. Minimum number of captives disembarked: http://127.0.0.1:8000/voyage/min_number_disembarked/N?format=json
-1. Voyage by id: http://127.0.0.1:8000/voyage/by_id/N
+http://127.0.0.1:8000/voyage/
 
-It seems pretty fast -- this is encouraging.
+* parameters:
+	* "selected_fields": accepts any top-level variable, e.g. 
+		* "voyage_ship"
+		* "voyage_crew"
+		* (in other words, table names in our sql schema)
+	* "results_per_page": number of results. accepts an integer
+	* "results_page": the page number. accepts an integer
+* filter vars:
+	* any fully-qualified varible
+	* performs two kinds of search:
+		* min/max on a comma-separated range for numerical values
+		* inexact contains (sql "iLike") for text fields
+	* one special filter: "voyage_ids": accepts comma-separated integers
+
+For instance, try out: http://127.0.0.1:8000/voyage/?selected_fields=voyage_ship,voyage_ship_owner&voyage_ship_owner__name=Domingos Pacheco
+
+
+
 
 Next steps:
-1. Make a schema of nested, serialized variables' metadata available as an endpoint
-1. Present long-form data, fully searchable, with basic nested serializers
-1. Create an interface that uses both to display human-readable labels for interactive variables (so a searchable table is the basic form of this)
+1. Make a metadata endpoint available:
+	1. schema of nested, serialized variables' metadata
+	1. try to include the min&max for numeric types, in order to be able to auto-populate slider scales
+1. Create an interface that uses the above to display human-readable labels for interactive variables (so a searchable table is the basic form of this)
 1. Begin to refine views by focusing in on subsets of the data (like numerical data, or names, or geographic regions)
+
+I've also included some db migration scripts (clear.sh does it all if the hard-coded variables are correct).

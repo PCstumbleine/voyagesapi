@@ -9,36 +9,13 @@ from .models import Voyage
 from .serializers import VoyageSerializer
 from .fields import *
 
-#def index(request):
-#    return HttpResponse("Hello, world. You're at the voyages index.")
-
-defaultlimit=10
-
 
 #lookups: https://docs.djangoproject.com/en/3.2/ref/models/querysets/#field-lookups
-
-class VoyageByMinDisembarked(APIView):
-	
-	def get(self,request,imp_total_num_slaves_disembarked):
-	
-		queryset=Voyage.objects.filter(voyage_slaves_numbers__imp_total_num_slaves_disembarked__gt=imp_total_num_slaves_disembarked)
-		
-		read_serializer = VoyageSerializer(queryset,many=True)
-		
-		return Response(read_serializer.data)
-	
-
-
-
-
-
 
 class VoyageList(APIView):
 	
 	def get(self,request):
-
 		params=self.request.query_params
-		
 		
 		#FIELD SELECTION
 		## selected_fields
@@ -83,11 +60,8 @@ class VoyageList(APIView):
 			voyage_id=[int(i) for i in voyage_ids.split(',')]
 			queryset = queryset.filter(voyage_id__in=voyage_id)
 		
-		####DATES
-		
 		
 		#the below variables (numeric_fields, text_fields) are defined in fields.py
-		
 		active_numeric_search_fields=[i for i in set(params).intersection(set(numeric_fields))]
 		
 		if len(active_numeric_search_fields)>0:
@@ -101,8 +75,6 @@ class VoyageList(APIView):
 			queryset=queryset.filter(**kwargs)
 		
 		active_text_search_fields=[i for i in set(params).intersection(set(text_fields))]
-		
-		
 		if len(active_text_search_fields)>0:
 			for field in active_text_search_fields:
 				searchstring=params.get(field)
@@ -112,22 +84,6 @@ class VoyageList(APIView):
 			print(kwargs)
 			queryset=queryset.filter(**kwargs)
 		
-		
-		
-		'''
-		##imp_length_home_to_disembark: TWO INTEGERS, COMMA-SEPARATED
-		imp_length_home_to_disembark=params.get('voyage_dates__imp_length_home_to_disembark')
-		if imp_length_home_to_disembark!=None:
-			imp_length_home_to_disembark=[int(i) for i in imp_length_home_to_disembark.split(',')]
-			queryset = queryset.filter(voyage_dates__imp_length_home_to_disembark__lte=max(imp_length_home_to_disembark))
-			queryset = queryset.filter(voyage_dates__imp_length_home_to_disembark__gte=min(imp_length_home_to_disembark))
-		
-		imp_length_leaving_africa_to_disembark=params.get('voyage_dates__imp_length_leaving_africa_to_disembark')
-		if imp_length_leaving_africa_to_disembark!=None:
-			imp_length_leaving_africa_to_disembark=[int(i) for i in imp_length_leaving_africa_to_disembark.split(',')]
-			queryset = queryset.filter(voyage_dates__imp_length_leaving_africa_to_disembark__lte=max(imp_length_leaving_africa_to_disembark))
-			queryset = queryset.filter(voyage_dates__imp_length_leaving_africa_to_disembark__gte=min(imp_length_leaving_africa_to_disembark))
-		'''
 		
 		read_serializer=VoyageSerializer(queryset[start_idx:end_idx],many=True,selected_fields=selected_query_fields)
 		

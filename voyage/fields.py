@@ -45,6 +45,7 @@ numeric_fields=[
 	'voyage_itinerary__percentage_female',
 	'voyage_itinerary__imp_mortality_ratio',
 	'voyage_dates__length_middle_passage_days',
+	'voyage_dates__arrival_year',
 	'voyage_dates__imp_length_home_to_disembark',
 	'voyage_dates__imp_length_leaving_africa_to_disembark',
 	'voyage_ship__tonnage',

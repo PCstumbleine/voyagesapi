@@ -7,6 +7,8 @@ from rest_framework.response import Response
 import json
 from .models import Voyage
 from .serializers import VoyageSerializer
+
+##This is already broken -- I need a way to get the fields & metadata off the serializer instance.
 from .fields import *
 
 
@@ -19,7 +21,7 @@ class VoyageList(APIView):
 		
 		#FIELD SELECTION
 		## selected_fields
-		### this is important because responses can quickly become large enough (not on the SQL side but on spitting them back out) to dramatically slow the response time
+		### currently can only select tables one level down -- all the subsidiary fields come with it
 		selected_fields=params.get('selected_fields')
 		if selected_fields!=None:
 			selected_query_fields=(i for i in selected_fields.split(','))
@@ -47,7 +49,6 @@ class VoyageList(APIView):
 		start_idx=results_page*results_per_page
 		end_idx=(results_page+1)*results_per_page
 		
-		
 		### NOW THE REAL VARIABLES
 		#the base queryset contains all voyages
 		#on stacking query vars: https://docs.djangoproject.com/en/3.2/topics/db/queries/#querysets-are-lazy
@@ -59,7 +60,6 @@ class VoyageList(APIView):
 		if voyage_ids!=None:
 			voyage_id=[int(i) for i in voyage_ids.split(',')]
 			queryset = queryset.filter(voyage_id__in=voyage_id)
-		
 		
 		#the below variables (numeric_fields, text_fields) are defined in fields.py
 		active_numeric_search_fields=[i for i in set(params).intersection(set(numeric_fields))]
@@ -84,10 +84,6 @@ class VoyageList(APIView):
 			print(kwargs)
 			queryset=queryset.filter(**kwargs)
 		
-		
 		read_serializer=VoyageSerializer(queryset[start_idx:end_idx],many=True,selected_fields=selected_query_fields)
-		
-		def get_serializer_context(self):
-			return {'request': self.request}
 		
 		return JsonResponse(read_serializer.data,safe=False)

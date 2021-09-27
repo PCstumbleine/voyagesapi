@@ -13,6 +13,17 @@ The app has one working endpoint, but it's quite flexible.
 
 http://127.0.0.1:8000/voyage/
 
+* schema endpoint: OPTIONS http call to 127.0.0.1:8000/voyage/
+	* my code here is not ideal, but the below documentation simply didn't work
+		* http://www.tomchristie.com/rest-framework-2-docs/topics/documenting-your-api#endpoint-documentation
+		* https://www.django-rest-framework.org/api-guide/generic-views/#retrievemodelmixin
+	* in the meantime, I return a nested dictionary with:
+		* serializer var names as keys
+			* which can be concatenated with a double underscore "__" for a fully-qualified var name
+			* and therefore passed back as search terms or display filters			
+		* labels for display to the user, taken from the model (via the serializer)
+		* string representations of data types, which can be used to construct the appropriate search interface
+
 * parameters:
 	* "selected_fields": accepts any top-level variable, e.g. 
 		* "voyage_ship"
@@ -28,8 +39,6 @@ http://127.0.0.1:8000/voyage/
 	* one special filter: "voyage_ids": accepts comma-separated integers
 
 For instance, try out: http://127.0.0.1:8000/voyage/?selected_fields=voyage_ship,voyage_ship_owner&voyage_ship_owner__name=Domingos Pacheco
-
-
 
 
 Next steps:

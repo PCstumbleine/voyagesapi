@@ -42,6 +42,12 @@ INSTALLED_APPS = [
     'rest_framework'
 ]
 
+#DRF settings
+#via https://www.django-rest-framework.org/api-guide/metadata/#setting-the-metadata-scheme
+REST_FRAMEWORK = {
+	'DEFAULT_METADATA_CLASS': 'rest_framework.metadata.SimpleMetadata'
+}
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',

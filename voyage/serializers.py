@@ -120,8 +120,8 @@ class VesselCapturedOutcomeSerializer(DynamicFieldsModelSerializer):
 		fields='__all__'
 
 class VoyageOutcomeSerializer(DynamicFieldsModelSerializer):
-	owner_outcome=OwnerOutcomeSerializer(selected_fields=('label',))
-	slaves_outcome=SlavesOutcomeSerializer(selected_fields=('label',))
+	outcome_owner=OwnerOutcomeSerializer(selected_fields=('label',))
+	outcome_slaves=SlavesOutcomeSerializer(selected_fields=('label',))
 	particular_outcome=ParticularOutcomeSerializer(selected_fields=('label',))
 	resistance=ResistanceSerializer(selected_fields=('label',))
 	vessel_captured_outcome=VesselCapturedOutcomeSerializer(selected_fields=('label',))

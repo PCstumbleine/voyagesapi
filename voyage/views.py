@@ -3,10 +3,11 @@ from django.db.models import Q,Prefetch
 from django.http import HttpResponse, JsonResponse
 from rest_framework.views import APIView
 from rest_framework import generics
+from rest_framework.metadata import SimpleMetadata
 from rest_framework.response import Response
 import json
 from .models import Voyage
-from .serializers import VoyageSerializer
+from .serializers import *
 
 ##This is already broken -- I need a way to get the fields & metadata off the serializer instance.
 from .fields import *
@@ -14,9 +15,46 @@ from .fields import *
 
 #lookups: https://docs.djangoproject.com/en/3.2/ref/models/querysets/#field-lookups
 
-class VoyageList(APIView):
+class VoyageList(generics.GenericAPIView):
 	
+	metadata_class=SimpleMetadata
+	serializer_class=VoyageSerializer
+	
+	schema={}
+	
+	def options(self, request, *args, **kwargs):
+		"""
+		Handler method for HTTP 'OPTIONS' request.
+		"""
+		#all my attempts at using the options calls to serialize this fell flat
+		#http://www.tomchristie.com/rest-framework-2-docs/topics/documenting-your-api#endpoint-documentation
+		#https://www.django-rest-framework.org/api-guide/generic-views/#retrievemodelmixin
+		#could not get any data out of it
+		#so overriding the options here and doing a very basic walk
+		#self.serializer=VoyageSerializer
+		s=self.get_serializer().fields.__dict__['fields']
+		schema={}
+		for i in s:
+			schema[i]={}
+			#print(s[i])		
+			try:
+				nf=s[i].fields
+				#print(nf)
+				#schema[i][nf]={}
+				for n in nf:
+					label=nf[n].label
+					datatypestr=str(type(nf[n]))
+					schema[i][n]={'type':datatypestr,'label':label}
+			except:
+				label=s[i].label
+				datatypestr=str(type(s[i]))
+				schema[i]={'type':datatypestr,'label':label}
+		
+		return JsonResponse(schema,safe=False)
+        
 	def get(self,request):
+		queryset=Voyage.objects.all()
+		
 		params=self.request.query_params
 		
 		#FIELD SELECTION
@@ -52,7 +90,7 @@ class VoyageList(APIView):
 		### NOW THE REAL VARIABLES
 		#the base queryset contains all voyages
 		#on stacking query vars: https://docs.djangoproject.com/en/3.2/topics/db/queries/#querysets-are-lazy
-		queryset=Voyage.objects.all()
+		
 
 		####VOYAGE_ID COMMA-SEPARATED INTEGERS
 		#now we just have to enumerate our varibles and build filters for them.

@@ -18,27 +18,23 @@ from .fields import *
 
 def walker(schema,base_address,serializer):	
 	#this one will dig into a schema and get what it can.
-	#not fragile, but not smart.
 	try:
 		fields=serializer.fields.__dict__['fields']
-		for field in fields:
-			datatypestr=str(type(fields[field]))
-		
-			if base_address!='':
-				address='__'.join([base_address,field])
-			else:
-				address=field
-		
-			if 'serializer' in datatypestr:
-				schema=walker(schema,address,fields[field])
-			else:
-				label=fields[field].label
-				schema[address]={'type':datatypestr,'label':label}
 	except:
-		print(base_address)
-		
-		#it does not capture the "through" fields
-		#help(serializer)
+		#this (unintelligently) handles through fields
+		fields=serializer.__dict__['child'].fields
+	for field in fields:
+		datatypestr=str(type(fields[field]))
+	
+		if base_address!='':
+			address='__'.join([base_address,field])
+		else:
+			address=field
+		if 'serializer' in datatypestr:
+			schema=walker(schema,address,fields[field])
+		else:
+			label=fields[field].label
+			schema[address]={'type':datatypestr,'label':label}	
 	return schema
 
 

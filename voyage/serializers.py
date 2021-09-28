@@ -155,12 +155,11 @@ class VoyageShipOwnerSerializer(DynamicFieldsModelSerializer):
 
 ##### SOURCES ##### 
 
-
 class VoyageSourcesSerializer(serializers.ModelSerializer):
-	source_type = serializers.SlugRelatedField(slug_field='group_name',read_only=True)
 	class Meta:
 		model=VoyageSources
-		fields=('full_ref','source_type')
+		depth=1
+		fields='__all__'
 
 class VoyageDatesSerializer(DynamicFieldsModelSerializer):
 	arrival_year=serializers.SerializerMethodField('get_arrival_year')

@@ -120,11 +120,11 @@ class VesselCapturedOutcomeSerializer(DynamicFieldsModelSerializer):
 		fields='__all__'
 
 class VoyageOutcomeSerializer(DynamicFieldsModelSerializer):
-	outcome_owner=OwnerOutcomeSerializer(selected_fields=('label',))
-	outcome_slaves=SlavesOutcomeSerializer(selected_fields=('label',))
-	particular_outcome=ParticularOutcomeSerializer(selected_fields=('label',))
-	resistance=ResistanceSerializer(selected_fields=('label',))
-	vessel_captured_outcome=VesselCapturedOutcomeSerializer(selected_fields=('label',))
+	outcome_owner=OwnerOutcomeSerializer()
+	outcome_slaves=SlavesOutcomeSerializer()
+	particular_outcome=ParticularOutcomeSerializer()
+	resistance=ResistanceSerializer()
+	vessel_captured_outcome=VesselCapturedOutcomeSerializer()
 	class Meta:
 		model=VoyageOutcome
 		fields='__all__'
@@ -155,16 +155,12 @@ class VoyageShipOwnerSerializer(DynamicFieldsModelSerializer):
 
 ##### SOURCES ##### 
 
-class VoyageSourcesTypeSerializer(DynamicFieldsModelSerializer):
-	class Meta:
-		model=VoyageSourcesType
-		fields='__all__'
 
-class VoyageSourcesSerializer(DynamicFieldsModelSerializer):
-	source_type=VoyageSourcesTypeSerializer(selected_fields=('group_name',))
+class VoyageSourcesSerializer(serializers.ModelSerializer):
+	source_type = serializers.SlugRelatedField(slug_field='group_name',read_only=True)
 	class Meta:
 		model=VoyageSources
-		fields='__all__'
+		fields=('full_ref','source_type')
 
 class VoyageDatesSerializer(DynamicFieldsModelSerializer):
 	arrival_year=serializers.SerializerMethodField('get_arrival_year')
@@ -180,12 +176,12 @@ class VoyageSerializer(DynamicFieldsModelSerializer):
 	voyage_ship=VoyageShipSerializer(excluded_fields=('id','voyage'))
 	voyage_groupings=VoyageGroupingsSerializer(selected_fields=('label',))
 	voyage_crew=VoyageCrewSerializer(excluded_fields=('id','voyage'))
-	voyage_sources=VoyageSourcesSerializer(selected_fields=('full_ref','source_type'),many=True,read_only=True)
+	voyage_sources=VoyageSourcesSerializer(many=True,read_only=True)
 	voyage_captain=VoyageCaptainSerializer(excluded_fields=('id','voyage'),many=True,read_only=True)
 	voyage_ship_owner=VoyageShipOwnerSerializer(excluded_fields=('id','voyage'),many=True,read_only=True)
 	voyage_slaves_numbers=VoyageSlavesNumbersSerializer(excluded_fields=('id','voyage'))
 	voyage_itinerary=VoyageItinerarySerializer(excluded_fields=('id','voyage'))
-	voyage_outcomes=VoyageOutcomeSerializer(excluded_fields=('id','voyage'),many=True,read_only=True)
+	voyage_outcomes=VoyageOutcomeSerializer(excluded_fields=('id','voyage'),read_only=True)
 	 
 	class Meta:
 		model=Voyage

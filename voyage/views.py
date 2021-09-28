@@ -15,40 +15,45 @@ from .fields import *
 
 #lookups: https://docs.djangoproject.com/en/3.2/ref/models/querysets/#field-lookups
 
+
+def walker(schema,base_address,serializer):	
+	#this one will dig into a schema and get what it can.
+	#not fragile, but not smart.
+	try:
+		fields=serializer.fields.__dict__['fields']
+		for field in fields:
+			datatypestr=str(type(fields[field]))
+		
+			if base_address!='':
+				address='__'.join([base_address,field])
+			else:
+				address=field
+		
+			if 'serializer' in datatypestr:
+				schema=walker(schema,address,fields[field])
+			else:
+				label=fields[field].label
+				schema[address]={'type':datatypestr,'label':label}
+	except:
+		print(base_address)
+		
+		#it does not capture the "through" fields
+		#help(serializer)
+	return schema
+
+
 class VoyageList(generics.GenericAPIView):
 	
 	metadata_class=SimpleMetadata
 	serializer_class=VoyageSerializer
 	
-	schema={}
-	
 	def options(self, request, *args, **kwargs):
 		"""
 		Handler method for HTTP 'OPTIONS' request.
-		"""
-		#all my attempts at using the options calls to serialize this fell flat
-		#http://www.tomchristie.com/rest-framework-2-docs/topics/documenting-your-api#endpoint-documentation
-		#https://www.django-rest-framework.org/api-guide/generic-views/#retrievemodelmixin
-		#could not get any data out of it
-		#so overriding the options here and doing a very basic walk
-		#self.serializer=VoyageSerializer
-		s=self.get_serializer().fields.__dict__['fields']
-		schema={}
-		for i in s:
-			schema[i]={}
-			#print(s[i])		
-			try:
-				nf=s[i].fields
-				#print(nf)
-				#schema[i][nf]={}
-				for n in nf:
-					label=nf[n].label
-					datatypestr=str(type(nf[n]))
-					schema[i][n]={'type':datatypestr,'label':label}
-			except:
-				label=s[i].label
-				datatypestr=str(type(s[i]))
-				schema[i]={'type':datatypestr,'label':label}
+		"""		
+		#the below renders a flat schema, with double-underscores marking nested relations.
+		#easy enough to unpack if that's what we want
+		schema=walker({},base_address='',serializer=self.get_serializer())
 		
 		return JsonResponse(schema,safe=False)
         

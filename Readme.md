@@ -38,7 +38,7 @@ http://127.0.0.1:8000/voyage/
 		* inexact contains (sql "iLike") for text fields
 	* one special filter: "voyage_ids": accepts comma-separated integers
 
-For instance, try out: http://127.0.0.1:8000/voyage/?selected_fields=voyage_ship,voyage_ship_owner&voyage_ship_owner__name=Domingos Pacheco
+For instance, try out: http://127.0.0.1:8000/voyage/?selected_fields=voyage_ship,voyage_ship_owner&voyage_ship_owner__name=Domingos%20Pacheco
 
 Next steps:
 1. Provide selection helper endpoints

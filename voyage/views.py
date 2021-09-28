@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.db.models import Q,Prefetch
 from django.http import HttpResponse, JsonResponse
-from rest_framework.views import APIView
+from rest_framework.schemas.openapi import AutoSchema
 from rest_framework import generics
 from rest_framework.metadata import SimpleMetadata
 from rest_framework.response import Response
@@ -17,20 +17,27 @@ from .fields import *
 
 
 def walker(schema,base_address,serializer):	
-	#this one will dig into a schema and get what it can.
+	#this one will dig into a schema and get what it can, returning a flat schema.
 	try:
 		fields=serializer.fields.__dict__['fields']
 	except:
 		#this (unintelligently) handles through fields
 		fields=serializer.__dict__['child'].fields
+		
 	for field in fields:
 		datatypestr=str(type(fields[field]))
-	
 		if base_address!='':
 			address='__'.join([base_address,field])
 		else:
 			address=field
-		if 'serializer' in datatypestr:
+		if 'SerializerMethodField' in datatypestr:
+			#this handles serializermethodfields
+			#(which I am storing in the "default" key)
+			label=fields[field].label
+			datatypestr=str(fields[field].__dict__['default'])
+			schema[address]={'type':datatypestr,'label':label}	
+		elif 'serializer' in datatypestr:
+			#print(address)
 			schema=walker(schema,address,fields[field])
 		else:
 			label=fields[field].label
@@ -49,6 +56,7 @@ class VoyageList(generics.GenericAPIView):
 		"""		
 		#the below renders a flat schema, with double-underscores marking nested relations.
 		#easy enough to unpack if that's what we want
+		
 		schema=walker({},base_address='',serializer=self.get_serializer())
 		
 		return JsonResponse(schema,safe=False)

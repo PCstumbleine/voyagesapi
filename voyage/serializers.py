@@ -1,7 +1,8 @@
 from rest_framework import serializers
-from rest_framework.fields import SerializerMethodField
+from rest_framework.fields import SerializerMethodField,IntegerField
 import re
 from .models import *
+
 
 
 #https://www.django-rest-framework.org/api-guide/serializers/#dynamically-modifying-fields
@@ -92,6 +93,23 @@ class VoyageItinerarySerializer(DynamicFieldsModelSerializer):
 		model=VoyageSlavesNumbers
 		fields='__all__'
 
+
+
+##### SOURCES ##### 
+
+class VoyageSourcesTypeSerializer(DynamicFieldsModelSerializer):
+	class Meta:
+		model=VoyageSourcesType
+		fields='__all__'
+
+class VoyageSourcesSerializer(DynamicFieldsModelSerializer):
+	source_type=VoyageSourcesTypeSerializer(excluded_fields=('id','group_id'))
+	class Meta:
+		model=VoyageSources
+		fields='__all__'
+		
+		
+		
 ##### OUTCOMES #####
 
 class OwnerOutcomeSerializer(DynamicFieldsModelSerializer):
@@ -120,11 +138,11 @@ class VesselCapturedOutcomeSerializer(DynamicFieldsModelSerializer):
 		fields='__all__'
 
 class VoyageOutcomeSerializer(DynamicFieldsModelSerializer):
-	outcome_owner=OwnerOutcomeSerializer()
-	outcome_slaves=SlavesOutcomeSerializer()
-	particular_outcome=ParticularOutcomeSerializer()
-	resistance=ResistanceSerializer()
-	vessel_captured_outcome=VesselCapturedOutcomeSerializer()
+	outcome_owner=OwnerOutcomeSerializer(excluded_fields=('id','value'))
+	outcome_slaves=SlavesOutcomeSerializer(excluded_fields=('id','value'))
+	particular_outcome=ParticularOutcomeSerializer(excluded_fields=('id','value'))
+	resistance=ResistanceSerializer(excluded_fields=('id','value'))
+	vessel_captured_outcome=VesselCapturedOutcomeSerializer(excluded_fields=('id','value'))
 	class Meta:
 		model=VoyageOutcome
 		fields='__all__'
@@ -153,16 +171,17 @@ class VoyageShipOwnerSerializer(DynamicFieldsModelSerializer):
 		model=VoyageShipOwner
 		fields='__all__'
 
-##### SOURCES ##### 
 
-class VoyageSourcesSerializer(serializers.ModelSerializer):
-	class Meta:
-		model=VoyageSources
-		depth=1
-		fields='__all__'
+
+
+
+
 
 class VoyageDatesSerializer(DynamicFieldsModelSerializer):
-	arrival_year=serializers.SerializerMethodField('get_arrival_year')
+	#the serializermethodfield types return a default field of "<class 'rest_framework.fields.empty'>"
+	#so I decided to park that with the appropriate rest framework datatype (here, IntegerField)
+	#my view looks to __dict__['default'] for the type when it encounters a SerializerMethodField
+	arrival_year=serializers.SerializerMethodField(default=IntegerField)
 	def get_arrival_year(self,obj):
 		return obj.get_date_year(obj.imp_arrival_at_port_of_dis)
 	class Meta:
@@ -180,7 +199,7 @@ class VoyageSerializer(DynamicFieldsModelSerializer):
 	voyage_ship_owner=VoyageShipOwnerSerializer(excluded_fields=('id','voyage'),many=True,read_only=True)
 	voyage_slaves_numbers=VoyageSlavesNumbersSerializer(excluded_fields=('id','voyage'))
 	voyage_itinerary=VoyageItinerarySerializer(excluded_fields=('id','voyage'))
-	voyage_outcomes=VoyageOutcomeSerializer(excluded_fields=('id','voyage'),read_only=True)
+	voyage_outcomes=VoyageOutcomeSerializer(many=True,read_only=True,excluded_fields=('id','voyage'))
 	 
 	class Meta:
 		model=Voyage

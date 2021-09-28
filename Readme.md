@@ -28,8 +28,8 @@ For instance, try out: OPTIONS http://127.0.0.1:8000/voyage/?hierarchical=True
 Note:
 my code here is not ideal, but the below documentation simply yield good results. 
 
-	* http://www.tomchristie.com/rest-framework-2-docs/topics/documenting-your-api#endpoint-documentation
-	* https://www.django-rest-framework.org/api-guide/generic-views/#retrievemodelmixin
+* http://www.tomchristie.com/rest-framework-2-docs/topics/documenting-your-api#endpoint-documentation
+* https://www.django-rest-framework.org/api-guide/generic-views/#retrievemodelmixin
 
 
 

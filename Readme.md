@@ -4,6 +4,7 @@
 This is an attempt to rebuild the Voyages API with as few dependencies as possible in the latest versions of django and python
 
 To launch the project
+
 	python3 -m venv venv
 	source venv/bin/activate
 	pip3 install -r requirements.txt

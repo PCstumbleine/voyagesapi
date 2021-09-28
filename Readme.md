@@ -26,8 +26,7 @@ The app has two working endpoints.
 
 For instance, try out: OPTIONS http://127.0.0.1:8000/voyage/?hierarchical=True
 
-Note:
-my code here is not ideal, but the below documentation simply yield good results. 
+Note: My code here is not ideal, but the below documentation simply didn't yield good results. 
 
 * http://www.tomchristie.com/rest-framework-2-docs/topics/documenting-your-api#endpoint-documentation
 * https://www.django-rest-framework.org/api-guide/generic-views/#retrievemodelmixin

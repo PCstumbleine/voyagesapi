@@ -24,7 +24,7 @@ http://127.0.0.1:8000/voyage/
 		* labels for display to the user, taken from the model (via the serializer)
 		* string representations of data types, which can be used to construct the appropriate search interface
 
-* parameters:
+* parameters (on GET http calls):
 	* "selected_fields": accepts any top-level variable, e.g. 
 		* "voyage_ship"
 		* "voyage_crew"
@@ -40,11 +40,10 @@ http://127.0.0.1:8000/voyage/
 
 For instance, try out: http://127.0.0.1:8000/voyage/?selected_fields=voyage_ship,voyage_ship_owner&voyage_ship_owner__name=Domingos Pacheco
 
-
 Next steps:
-1. Make a metadata endpoint available:
-	1. schema of nested, serialized variables' metadata
-	1. try to include the min&max for numeric types, in order to be able to auto-populate slider scales
+1. Provide selection helper endpoints
+	1. min & max for numeric types, in order to be able to auto-populate slider scales
+	1. distinct values for selection fields (e.g. the geo variables)
 1. Create an interface that uses the above to display human-readable labels for interactive variables (so a searchable table is the basic form of this)
 1. Begin to refine views by focusing in on subsets of the data (like numerical data, or names, or geographic regions)
 

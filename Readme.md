@@ -37,8 +37,8 @@ my code here is not ideal, but the below documentation simply yield good results
 ### data endpoint: GET http calls to 127.0.0.1:8000/voyage/
 
 * Choose which tables to display with "selected_fields" parameters. accepts any top-level variable, e.g. 
-		* "voyage_ship"
-		* "voyage_crew"
+	* "voyage_ship"
+	* "voyage_crew"
 	* "results_per_page": number of results. accepts an integer
 	* "results_page": the page number. accepts an integer
 * Filter/search on any variable

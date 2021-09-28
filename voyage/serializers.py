@@ -171,12 +171,6 @@ class VoyageShipOwnerSerializer(DynamicFieldsModelSerializer):
 		model=VoyageShipOwner
 		fields='__all__'
 
-
-
-
-
-
-
 class VoyageDatesSerializer(DynamicFieldsModelSerializer):
 	#the serializermethodfield types return a default field of "<class 'rest_framework.fields.empty'>"
 	#so I decided to park that with the appropriate rest framework datatype (here, IntegerField)

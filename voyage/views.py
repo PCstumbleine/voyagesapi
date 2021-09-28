@@ -15,9 +15,8 @@ from .fields import *
 
 #lookups: https://docs.djangoproject.com/en/3.2/ref/models/querysets/#field-lookups
 
-
+##RECURSIVE DRILL-DOWN INTO A SCHEMA, GETS ALL ITS FIELDS, THEIR LABELS, AND DATATYPES
 def walker(schema,base_address,serializer):	
-	#this one will dig into a schema and get what it can, returning a flat schema.
 	try:
 		fields=serializer.fields.__dict__['fields']
 	except:
@@ -44,20 +43,47 @@ def walker(schema,base_address,serializer):
 			schema[address]={'type':datatypestr,'label':label}	
 	return schema
 
+##RECURSIVE NEST-BUILDER
+def addlevel(thisdict,keychain,payload):
+	thiskey=keychain.pop(0)
+	if len(keychain)>0:
+		if thiskey not in thisdict:
+			thisdict[thiskey]={}
+		thisdict[thiskey]=addlevel(thisdict[thiskey],keychain,payload)
+	else:
+		thisdict[thiskey]=payload
+	return thisdict
+
 
 class VoyageList(generics.GenericAPIView):
 	
 	metadata_class=SimpleMetadata
 	serializer_class=VoyageSerializer
 	
-	def options(self, request, *args, **kwargs):
+	def options(self,request):
 		"""
 		Handler method for HTTP 'OPTIONS' request.
+		CAN SPECIFY "hierarchical=True to get a nested schema" -- DEFAULT IS FLAT
 		"""		
-		#the below renders a flat schema, with double-underscores marking nested relations.
-		#easy enough to unpack if that's what we want
-		
+		#GETS A FLAT VERSION OF THE SCHEMA WITH DOUBLE-UNDERSCORES FOR NESTED RELATIONS
 		schema=walker({},base_address='',serializer=self.get_serializer())
+		
+		if 'hierarchical' in request.query_params:
+			if request.query_params['hierarchical'].lower() in ['true','1','y']:
+				hierarchical=True
+		else:
+				hierarchical=False
+		
+		unwound={}
+		if hierarchical:
+			for i in schema:
+				payload=schema[i]
+				keychain=i.split('__')
+				key=keychain[0]
+				unwound=addlevel(unwound,keychain,payload)
+				#print("=++++++=\n",key,unwound,"\n=++++++=")
+			schema=unwound
+		
 		
 		return JsonResponse(schema,safe=False)
         

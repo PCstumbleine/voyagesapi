@@ -39,6 +39,7 @@ my code here is not ideal, but the below documentation simply yield good results
 * Choose which tables to display with "selected_fields" parameters. accepts any top-level variable, e.g. 
 	* "voyage_ship"
 	* "voyage_crew"
+* Pagination:
 	* "results_per_page": number of results. accepts an integer
 	* "results_page": the page number. accepts an integer
 * Filter/search on any variable

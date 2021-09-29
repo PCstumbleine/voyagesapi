@@ -58,25 +58,16 @@ class VoyageSlavesNumbersSerializer(DynamicFieldsModelSerializer):
 ##### VESSEL VARIABLES ##### 
 ###at first glance, i seem only to be getting values on three of the below.
 
-class RigOfVesselSerializer(DynamicFieldsModelSerializer):
-	class Meta:
-		model=RigOfVessel
-		fields='__all__'
-		
-class TonTypeSerializer(DynamicFieldsModelSerializer):
-	class Meta:
-		model=TonType
-		fields='__all__'
-		
+
 class VoyageShipSerializer(DynamicFieldsModelSerializer):
-	rig_of_vessel=RigOfVesselSerializer(selected_fields=('label',))
-	imputed_nationality=NationalitySerializer(selected_fields=('label',))
-	nationality_ship=NationalitySerializer(selected_fields=('label',))
-	ton_type=TonTypeSerializer(selected_fields=('label',))
-	vessel_construction_place=PlaceSerializer(selected_fields=('label',))
-	vessel_construction_region=RegionSerializer(selected_fields=('label',))
-	registered_place=PlaceSerializer(selected_fields=('label',))
-	registered_region=RegionSerializer(selected_fields=('label',))
+	rig_of_vessel=serializers.SlugRelatedField(slug_field='label',read_only=True)
+	imputed_nationality=serializers.SlugRelatedField(slug_field='label',read_only=True)
+	nationality_ship=serializers.SlugRelatedField(slug_field='label',read_only=True)
+	ton_type=serializers.SlugRelatedField(slug_field='label',read_only=True)
+	vessel_construction_place=serializers.SlugRelatedField(slug_field='label',read_only=True)
+	vessel_construction_region=serializers.SlugRelatedField(slug_field='label',read_only=True)
+	registered_place=serializers.SlugRelatedField(slug_field='label',read_only=True)
+	registered_region=serializers.SlugRelatedField(slug_field='label',read_only=True)
 	class Meta:
 		model=VoyageShip
 		fields='__all__'
@@ -89,8 +80,47 @@ class VoyageSlavesNumbersSerializer(DynamicFieldsModelSerializer):
 		fields='__all__'
 
 class VoyageItinerarySerializer(DynamicFieldsModelSerializer):
+	port_of_departure = serializers.SlugRelatedField(slug_field='place',read_only=True)
+	int_first_port_emb = serializers.SlugRelatedField(slug_field='place',read_only=True)
+	int_second_port_emb = serializers.SlugRelatedField(slug_field='place',read_only=True)
+	int_first_region_purchase_slaves = serializers.SlugRelatedField(slug_field='region',read_only=True)
+	int_second_region_purchase_slaves = serializers.SlugRelatedField(slug_field='region',read_only=True)
+	int_first_port_dis = serializers.SlugRelatedField(slug_field='place',read_only=True)
+	int_second_port_dis = serializers.SlugRelatedField(slug_field='place',read_only=True)
+	int_first_region_slave_landing = serializers.SlugRelatedField(slug_field='region',read_only=True)
+	int_second_place_region_slave_landing = serializers.SlugRelatedField(slug_field='region',read_only=True)
+	first_place_slave_purchase = serializers.SlugRelatedField(slug_field='place',read_only=True)
+	second_place_slave_purchase = serializers.SlugRelatedField(slug_field='place',read_only=True)
+	third_place_slave_purchase = serializers.SlugRelatedField(slug_field='place',read_only=True)
+	first_region_slave_emb = serializers.SlugRelatedField(slug_field='region',read_only=True)
+	second_region_slave_emb = serializers.SlugRelatedField(slug_field='region',read_only=True)
+	third_region_slave_emb = serializers.SlugRelatedField(slug_field='region',read_only=True)
+	port_of_call_before_atl_crossing = serializers.SlugRelatedField(slug_field='place',read_only=True)
+	first_landing_place = serializers.SlugRelatedField(slug_field='place',read_only=True)
+	second_landing_place = serializers.SlugRelatedField(slug_field='place',read_only=True)
+	third_landing_place = serializers.SlugRelatedField(slug_field='place',read_only=True)
+	first_landing_region = serializers.SlugRelatedField(slug_field='region',read_only=True)
+	second_landing_region = serializers.SlugRelatedField(slug_field='region',read_only=True)
+	third_landing_region = serializers.SlugRelatedField(slug_field='region',read_only=True)
+	place_voyage_ended = serializers.SlugRelatedField(slug_field='place',read_only=True)
+	region_of_return = serializers.SlugRelatedField(slug_field='region',read_only=True)
+	broad_region_of_return = serializers.SlugRelatedField(slug_field='region',read_only=True)
+	imp_port_voyage_begin = serializers.SlugRelatedField(slug_field='place',read_only=True)
+	imp_region_voyage_begin = serializers.SlugRelatedField(slug_field='region',read_only=True)
+	imp_broad_region_voyage_begin = serializers.SlugRelatedField(slug_field='broad_region',read_only=True)
+	principal_place_of_slave_purchase = serializers.SlugRelatedField(slug_field='place',read_only=True)
+	imp_principal_place_of_slave_purchase = serializers.SlugRelatedField(slug_field='place',read_only=True)
+	imp_principal_region_of_slave_purchase = serializers.SlugRelatedField(slug_field='region',read_only=True)
+	imp_broad_region_of_slave_purchase = serializers.SlugRelatedField(slug_field='broad_region',read_only=True)
+	principal_port_of_slave_dis = serializers.SlugRelatedField(slug_field='place',read_only=True)
+	imp_principal_port_slave_dis = serializers.SlugRelatedField(slug_field='place',read_only=True)
+	imp_principal_region_slave_dis = serializers.SlugRelatedField(slug_field='region',read_only=True)
+	imp_broad_region_slave_dis = serializers.SlugRelatedField(slug_field='broad_region',read_only=True)
 	class Meta:
-		model=VoyageSlavesNumbers
+		model=VoyageItinerary
+		fields='__all__'
+	class Meta:
+		model=VoyageItinerary
 		fields='__all__'
 
 
@@ -112,37 +142,12 @@ class VoyageSourcesSerializer(DynamicFieldsModelSerializer):
 		
 ##### OUTCOMES #####
 
-class OwnerOutcomeSerializer(DynamicFieldsModelSerializer):
-	class Meta:
-		model=OwnerOutcome
-		fields='__all__'
-
-class SlavesOutcomeSerializer(DynamicFieldsModelSerializer):
-	class Meta:
-		model=SlavesOutcome
-		fields='__all__'
-
-class ParticularOutcomeSerializer(DynamicFieldsModelSerializer):
-	class Meta:
-		model=ParticularOutcome
-		fields='__all__'
-
-class ResistanceSerializer(DynamicFieldsModelSerializer):
-	class Meta:
-		model=Resistance
-		fields='__all__'
-
-class VesselCapturedOutcomeSerializer(DynamicFieldsModelSerializer):
-	class Meta:
-		model=VesselCapturedOutcome
-		fields='__all__'
-
 class VoyageOutcomeSerializer(DynamicFieldsModelSerializer):
-	outcome_owner=OwnerOutcomeSerializer(excluded_fields=('id','value'))
-	outcome_slaves=SlavesOutcomeSerializer(excluded_fields=('id','value'))
-	particular_outcome=ParticularOutcomeSerializer(excluded_fields=('id','value'))
-	resistance=ResistanceSerializer(excluded_fields=('id','value'))
-	vessel_captured_outcome=VesselCapturedOutcomeSerializer(excluded_fields=('id','value'))
+	outcome_owner=serializers.SlugRelatedField(slug_field='label',read_only=True)
+	outcome_slaves=serializers.SlugRelatedField(slug_field='label',read_only=True)
+	particular_outcome=serializers.SlugRelatedField(slug_field='label',read_only=True)
+	resistance=serializers.SlugRelatedField(slug_field='label',read_only=True)
+	vessel_captured_outcome=serializers.SlugRelatedField(slug_field='label',read_only=True)
 	class Meta:
 		model=VoyageOutcome
 		fields='__all__'
@@ -198,3 +203,20 @@ class VoyageSerializer(DynamicFieldsModelSerializer):
 	class Meta:
 		model=Voyage
 		fields='__all__'
+		
+		
+'''class VoyagesQualQuantSerializer(DynamicFieldsModelSerializer):
+	voyage_ship=VoyageDatesSerializer(excluded_fields=('id','voyage'))
+	voyage_itinerary'''
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	

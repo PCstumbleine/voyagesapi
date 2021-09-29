@@ -1,8 +1,8 @@
 from rest_framework import serializers
-from rest_framework.fields import SerializerMethodField,IntegerField
+from rest_framework.fields import SerializerMethodField,IntegerField,CharField
 import re
 from .models import *
-
+from .data_viz import *
 
 
 #https://www.django-rest-framework.org/api-guide/serializers/#dynamically-modifying-fields
@@ -80,42 +80,42 @@ class VoyageSlavesNumbersSerializer(DynamicFieldsModelSerializer):
 		fields='__all__'
 
 class VoyageItinerarySerializer(DynamicFieldsModelSerializer):
-	port_of_departure = serializers.SlugRelatedField(slug_field='place',read_only=True)
-	int_first_port_emb = serializers.SlugRelatedField(slug_field='place',read_only=True)
-	int_second_port_emb = serializers.SlugRelatedField(slug_field='place',read_only=True)
-	int_first_region_purchase_slaves = serializers.SlugRelatedField(slug_field='region',read_only=True)
-	int_second_region_purchase_slaves = serializers.SlugRelatedField(slug_field='region',read_only=True)
-	int_first_port_dis = serializers.SlugRelatedField(slug_field='place',read_only=True)
-	int_second_port_dis = serializers.SlugRelatedField(slug_field='place',read_only=True)
-	int_first_region_slave_landing = serializers.SlugRelatedField(slug_field='region',read_only=True)
-	int_second_place_region_slave_landing = serializers.SlugRelatedField(slug_field='region',read_only=True)
-	first_place_slave_purchase = serializers.SlugRelatedField(slug_field='place',read_only=True)
-	second_place_slave_purchase = serializers.SlugRelatedField(slug_field='place',read_only=True)
-	third_place_slave_purchase = serializers.SlugRelatedField(slug_field='place',read_only=True)
-	first_region_slave_emb = serializers.SlugRelatedField(slug_field='region',read_only=True)
-	second_region_slave_emb = serializers.SlugRelatedField(slug_field='region',read_only=True)
-	third_region_slave_emb = serializers.SlugRelatedField(slug_field='region',read_only=True)
-	port_of_call_before_atl_crossing = serializers.SlugRelatedField(slug_field='place',read_only=True)
-	first_landing_place = serializers.SlugRelatedField(slug_field='place',read_only=True)
-	second_landing_place = serializers.SlugRelatedField(slug_field='place',read_only=True)
-	third_landing_place = serializers.SlugRelatedField(slug_field='place',read_only=True)
-	first_landing_region = serializers.SlugRelatedField(slug_field='region',read_only=True)
-	second_landing_region = serializers.SlugRelatedField(slug_field='region',read_only=True)
-	third_landing_region = serializers.SlugRelatedField(slug_field='region',read_only=True)
-	place_voyage_ended = serializers.SlugRelatedField(slug_field='place',read_only=True)
-	region_of_return = serializers.SlugRelatedField(slug_field='region',read_only=True)
-	broad_region_of_return = serializers.SlugRelatedField(slug_field='region',read_only=True)
-	imp_port_voyage_begin = serializers.SlugRelatedField(slug_field='place',read_only=True)
-	imp_region_voyage_begin = serializers.SlugRelatedField(slug_field='region',read_only=True)
-	imp_broad_region_voyage_begin = serializers.SlugRelatedField(slug_field='broad_region',read_only=True)
-	principal_place_of_slave_purchase = serializers.SlugRelatedField(slug_field='place',read_only=True)
-	imp_principal_place_of_slave_purchase = serializers.SlugRelatedField(slug_field='place',read_only=True)
-	imp_principal_region_of_slave_purchase = serializers.SlugRelatedField(slug_field='region',read_only=True)
-	imp_broad_region_of_slave_purchase = serializers.SlugRelatedField(slug_field='broad_region',read_only=True)
-	principal_port_of_slave_dis = serializers.SlugRelatedField(slug_field='place',read_only=True)
-	imp_principal_port_slave_dis = serializers.SlugRelatedField(slug_field='place',read_only=True)
-	imp_principal_region_slave_dis = serializers.SlugRelatedField(slug_field='region',read_only=True)
-	imp_broad_region_slave_dis = serializers.SlugRelatedField(slug_field='broad_region',read_only=True)
+	port_of_departure = serializers.SlugRelatedField(default=CharField,slug_field='place',read_only=True)
+	int_first_port_emb = serializers.SlugRelatedField(default=CharField,slug_field='place',read_only=True)
+	int_second_port_emb = serializers.SlugRelatedField(default=CharField,slug_field='place',read_only=True)
+	int_first_region_purchase_slaves = serializers.SlugRelatedField(default=CharField,slug_field='region',read_only=True)
+	int_second_region_purchase_slaves = serializers.SlugRelatedField(default=CharField,slug_field='region',read_only=True)
+	int_first_port_dis = serializers.SlugRelatedField(default=CharField,slug_field='place',read_only=True)
+	int_second_port_dis = serializers.SlugRelatedField(default=CharField,slug_field='place',read_only=True)
+	int_first_region_slave_landing = serializers.SlugRelatedField(default=CharField,slug_field='region',read_only=True)
+	int_second_place_region_slave_landing = serializers.SlugRelatedField(default=CharField,slug_field='region',read_only=True)
+	first_place_slave_purchase = serializers.SlugRelatedField(default=CharField,slug_field='place',read_only=True)
+	second_place_slave_purchase = serializers.SlugRelatedField(default=CharField,slug_field='place',read_only=True)
+	third_place_slave_purchase = serializers.SlugRelatedField(default=CharField,slug_field='place',read_only=True)
+	first_region_slave_emb = serializers.SlugRelatedField(default=CharField,slug_field='region',read_only=True)
+	second_region_slave_emb = serializers.SlugRelatedField(default=CharField,slug_field='region',read_only=True)
+	third_region_slave_emb = serializers.SlugRelatedField(default=CharField,slug_field='region',read_only=True)
+	port_of_call_before_atl_crossing = serializers.SlugRelatedField(default=CharField,slug_field='place',read_only=True)
+	first_landing_place = serializers.SlugRelatedField(default=CharField,slug_field='place',read_only=True)
+	second_landing_place = serializers.SlugRelatedField(default=CharField,slug_field='place',read_only=True)
+	third_landing_place = serializers.SlugRelatedField(default=CharField,slug_field='place',read_only=True)
+	first_landing_region = serializers.SlugRelatedField(default=CharField,slug_field='region',read_only=True)
+	second_landing_region = serializers.SlugRelatedField(default=CharField,slug_field='region',read_only=True)
+	third_landing_region = serializers.SlugRelatedField(default=CharField,slug_field='region',read_only=True)
+	place_voyage_ended = serializers.SlugRelatedField(default=CharField,slug_field='place',read_only=True)
+	region_of_return = serializers.SlugRelatedField(default=CharField,slug_field='region',read_only=True)
+	broad_region_of_return = serializers.SlugRelatedField(default=CharField,slug_field='region',read_only=True)
+	imp_port_voyage_begin = serializers.SlugRelatedField(default=CharField,slug_field='place',read_only=True)
+	imp_region_voyage_begin = serializers.SlugRelatedField(default=CharField,slug_field='region',read_only=True)
+	imp_broad_region_voyage_begin = serializers.SlugRelatedField(default=CharField,slug_field='broad_region',read_only=True)
+	principal_place_of_slave_purchase = serializers.SlugRelatedField(default=CharField,slug_field='place',read_only=True)
+	imp_principal_place_of_slave_purchase = serializers.SlugRelatedField(default=CharField,slug_field='place',read_only=True)
+	imp_principal_region_of_slave_purchase = serializers.SlugRelatedField(default=CharField,slug_field='region',read_only=True)
+	imp_broad_region_of_slave_purchase = serializers.SlugRelatedField(default=CharField,slug_field='broad_region',read_only=True)
+	principal_port_of_slave_dis = serializers.SlugRelatedField(default=CharField,slug_field='place',read_only=True)
+	imp_principal_port_slave_dis = serializers.SlugRelatedField(default=CharField,slug_field='place',read_only=True)
+	imp_principal_region_slave_dis = serializers.SlugRelatedField(default=CharField,slug_field='region',read_only=True)
+	imp_broad_region_slave_dis = serializers.SlugRelatedField(default=CharField,slug_field='broad_region',read_only=True)
 	class Meta:
 		model=VoyageItinerary
 		fields='__all__'
@@ -143,11 +143,11 @@ class VoyageSourcesSerializer(DynamicFieldsModelSerializer):
 ##### OUTCOMES #####
 
 class VoyageOutcomeSerializer(DynamicFieldsModelSerializer):
-	outcome_owner=serializers.SlugRelatedField(slug_field='label',read_only=True)
-	outcome_slaves=serializers.SlugRelatedField(slug_field='label',read_only=True)
-	particular_outcome=serializers.SlugRelatedField(slug_field='label',read_only=True)
-	resistance=serializers.SlugRelatedField(slug_field='label',read_only=True)
-	vessel_captured_outcome=serializers.SlugRelatedField(slug_field='label',read_only=True)
+	outcome_owner=serializers.SlugRelatedField(default=CharField,slug_field='label',read_only=True)
+	outcome_slaves=serializers.SlugRelatedField(default=CharField,slug_field='label',read_only=True)
+	particular_outcome=serializers.SlugRelatedField(default=CharField,slug_field='label',read_only=True)
+	resistance=serializers.SlugRelatedField(default=CharField,slug_field='label',read_only=True)
+	vessel_captured_outcome=serializers.SlugRelatedField(default=CharField,slug_field='label',read_only=True)
 	class Meta:
 		model=VoyageOutcome
 		fields='__all__'
@@ -205,11 +205,17 @@ class VoyageSerializer(DynamicFieldsModelSerializer):
 		fields='__all__'
 		
 		
-'''class VoyagesQualQuantSerializer(DynamicFieldsModelSerializer):
-	voyage_ship=VoyageDatesSerializer(excluded_fields=('id','voyage'))
-	voyage_itinerary'''
+class VoyageScatterDFSerializer(DynamicFieldsModelSerializer):
+	voyage_ship=VoyageShipSerializer(selected_fields=['tonnage_mod'])
+	voyage_dates=VoyageDatesSerializer(selected_fields=['imp_length_home_to_disembark','length_middle_passage_days'])
+	voyage_crew=VoyageCrewSerializer(selected_fields=['crew_voyage_outset','crew_first_landing'])
+	voyage_slaves_numbers=VoyageSlavesNumbersSerializer(selected_fields=['imp_total_num_slaves_disembarked','percentage_men','percentage_women','percentage_boy','percentage_girl','percentage_male','percentage_child','percentage_adult','percentage_female','imp_mortality_ratio','imp_jamaican_cash_price'])
 	
-	
+	#voyage_itinerary=VoyageItinerarySerializer
+	class Meta:
+		model=Voyage
+		fields='__all__'
+
 	
 	
 	

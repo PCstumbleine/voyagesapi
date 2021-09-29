@@ -58,6 +58,7 @@ For instance, try out GET http://127.0.0.1:8000/voyage/?selected_fields=voyage_s
 1. Provide selection helper endpoints
 	1. min & max for numeric types, in order to be able to auto-populate slider scales
 	1. distinct values for selection fields (e.g. the geo variables)
+1. Order-by/sort functionality in the queryset handler
 1. Create an interface that uses the above to display human-readable labels for interactive variables (so a searchable table is the basic form of this)
 1. Begin to refine views by focusing in on subsets of the data (like numerical data, or names, or geographic regions)
 

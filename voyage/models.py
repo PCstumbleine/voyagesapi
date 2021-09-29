@@ -814,6 +814,14 @@ class VoyageDates(models.Model):
 		blank=True,
 		null=True,
 		help_text="Date in format: MM,DD,YYYY")
+		
+	##THERE ARE CURRENTLY NO ENTRIES FOR imp_departed_africa that do not fit the format ",,YYYY". THIS IS A SPSS HANGOVER AND NEEDS TO BE FIXED. MEANTIME, A DUPLICATE COLUMN:
+	imp_departed_africa_year = models.IntegerField(
+		"Year departed Africa",
+		blank=True,
+		null=True,
+		help_text="Date in format: YYYY")
+		
 	imp_arrival_at_port_of_dis = models.CharField(
 		"Year of arrival at port of disembarkation (YEARAM)",
 		max_length=10,
@@ -821,12 +829,20 @@ class VoyageDates(models.Model):
 		null=True,
 		validators=[date_csv_field_validator],
 		help_text="Date in format: MM,DD,YYYY")
+	
+	##THERE ARE CURRENTLY NO ENTRIES FOR imp_arrival_at_port_of_dis that do not fit the format ",,YYYY". THIS IS A SPSS HANGOVER AND NEEDS TO BE FIXED. MEANTIME, A DUPLICATE COLUMN:
+	imp_arrival_at_port_of_dis_year = models.IntegerField(
+		"Year of arrival at port of disembarkation (YEARAM)",
+		blank=True,
+		null=True,
+		help_text="Date in format: YYYY")
 
 	# Later this can become just a property/ can be calculated
 	imp_length_home_to_disembark = models.IntegerField(
 		"Voyage length from home port to disembarkation (days) (VOY1IMP)",
 		null=True,
 		blank=True)
+		
 	imp_length_leaving_africa_to_disembark = models.IntegerField(
 		"Voyage length from last slave embarkation to first disembarkation "
 		"(days) (VOY2IMP)",
@@ -838,7 +854,7 @@ class VoyageDates(models.Model):
 							   blank=True,
 							   related_name="voyage_name_dates",
 							   on_delete=models.CASCADE)
-
+	
 	@classmethod
 	def get_date_year(cls, value):
 		"""

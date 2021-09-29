@@ -225,10 +225,7 @@ class VoyageList(generics.GenericAPIView):
 		all_voyage_fields=json.loads(r.text)
 		text_fields=[i for i in all_voyage_fields if 'CharField' in all_voyage_fields[i]['type']]
 		numeric_fields=[i for i in all_voyage_fields if i not in text_fields]
-		#print("NUMERIC:\n\n",numeric_fields)
-		#print("TEXT:\n\n",text_fields)
 		active_numeric_search_fields=[i for i in set(params).intersection(set(numeric_fields))]
-		print(active_numeric_search_fields)
 		if len(active_numeric_search_fields)>0:
 			for field in active_numeric_search_fields:
 				min,max=[float(i) for i in params.get(field).split(',')]
@@ -236,9 +233,7 @@ class VoyageList(generics.GenericAPIView):
 				'{0}__{1}'.format(field, 'lte'): max,
 				'{0}__{1}'.format(field, 'gte'): min
 				}
-			print(kwargs)
 			queryset=queryset.filter(**kwargs)
-		print(queryset)
 		active_text_search_fields=[i for i in set(params).intersection(set(text_fields))]
 		if len(active_text_search_fields)>0:
 			for field in active_text_search_fields:
@@ -246,7 +241,6 @@ class VoyageList(generics.GenericAPIView):
 				kwargs = {
 				'{0}__{1}'.format(field, 'icontains'): searchstring
 				}
-			print(kwargs)
 			queryset=queryset.filter(**kwargs)
 		read_serializer=VoyageSerializer(queryset[start_idx:end_idx],many=True,selected_fields=selected_query_fields)
 		return JsonResponse(read_serializer.data,safe=False)

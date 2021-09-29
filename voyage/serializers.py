@@ -180,9 +180,6 @@ class VoyageDatesSerializer(DynamicFieldsModelSerializer):
 	#the serializermethodfield types return a default field of "<class 'rest_framework.fields.empty'>"
 	#so I decided to park that with the appropriate rest framework datatype (here, IntegerField)
 	#my view looks to __dict__['default'] for the type when it encounters a SerializerMethodField
-	arrival_year=serializers.SerializerMethodField(default=IntegerField)
-	def get_arrival_year(self,obj):
-		return obj.get_date_year(obj.imp_arrival_at_port_of_dis)
 	class Meta:
 		model=VoyageDates
 		fields='__all__'
@@ -199,7 +196,6 @@ class VoyageSerializer(DynamicFieldsModelSerializer):
 	voyage_slaves_numbers=VoyageSlavesNumbersSerializer(excluded_fields=('id','voyage'))
 	voyage_itinerary=VoyageItinerarySerializer(excluded_fields=('id','voyage'))
 	voyage_outcomes=VoyageOutcomeSerializer(many=True,read_only=True,excluded_fields=('id','voyage'))
-	 
 	class Meta:
 		model=Voyage
 		fields='__all__'

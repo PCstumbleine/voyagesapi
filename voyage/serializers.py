@@ -123,8 +123,6 @@ class VoyageItinerarySerializer(DynamicFieldsModelSerializer):
 		model=VoyageItinerary
 		fields='__all__'
 
-
-
 ##### SOURCES ##### 
 
 class VoyageSourcesTypeSerializer(DynamicFieldsModelSerializer):
@@ -137,8 +135,6 @@ class VoyageSourcesSerializer(DynamicFieldsModelSerializer):
 	class Meta:
 		model=VoyageSources
 		fields='__all__'
-		
-		
 		
 ##### OUTCOMES #####
 

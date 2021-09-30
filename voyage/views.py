@@ -9,9 +9,10 @@ import json
 import requests
 from .models import Voyage
 from .serializers import *
+from .data_viz import *
 
 ##RECURSIVE DRILL-DOWN INTO A SCHEMA, GETS ALL ITS FIELDS, THEIR LABELS, AND DATATYPES
-def walker(schema,base_address,serializer):	
+def deserializer(schema,base_address,serializer):	
 	try:
 		fields=serializer.fields.__dict__['fields']
 	except:
@@ -32,11 +33,24 @@ def walker(schema,base_address,serializer):
 			schema[address]={'type':datatypestr,'label':label}
 		elif 'serializer' in datatypestr:
 			#print(address)
-			schema=walker(schema,address,fields[field])
+			schema=deserializer(schema,address,fields[field])
 		else:
 			label=fields[field].label
 			schema[address]={'type':datatypestr,'label':label}	
 	return schema
+
+
+##flattener: https://stackoverflow.com/a/6027615
+import collections
+def flatten(d, parent_key='', sep='__'):
+    items = []
+    for k, v in d.items():
+        new_key = parent_key + sep + k if parent_key else k
+        if isinstance(v, collections.MutableMapping):
+            items.extend(flatten(v, new_key, sep=sep).items())
+        else:
+            items.append((new_key, v))
+    return dict(items)
 
 ##RECURSIVE NEST-BUILDER
 def addlevel(thisdict,keychain,payload):
@@ -53,7 +67,7 @@ def addlevel(thisdict,keychain,payload):
 def generic_options(s,r):
 	#GETS A FLAT VERSION OF THE SCHEMA WITH DOUBLE-UNDERSCORES FOR NESTED RELATIONS
 	print(s,r)
-	schema=walker({},base_address='',serializer=s.get_serializer())
+	schema=deserializer({},base_address='',serializer=s.get_serializer())
 	
 	#CAN, ON REQUEST, TURN THAT INTO A NESTED LIST
 	if 'hierarchical' in r.query_params:
@@ -74,7 +88,7 @@ def generic_options(s,r):
 	return schema
 
 #GENERIC FUNCTION TO RUN A GET CALL ON VOYAGE-LIKE SERIALIZERS
-def voyage_get(s,r):
+def voyage_get(s,r,retrieve_all=False):
 	queryset=Voyage.objects.all()
 	params=r.query_params
 	
@@ -86,27 +100,6 @@ def voyage_get(s,r):
 		selected_query_fields=(i for i in selected_fields.split(','))
 	else:
 		selected_query_fields=None
-	
-	#PAGINATION
-	## results_per_page
-	## results_page
-	default_results_per_page=10
-	default_results_page=0
-	results_per_page=params.get('results_per_page')
-	
-	if results_per_page==None:
-		results_per_page=default_results_per_page
-	else:
-		results_per_page=int(results_per_page)
-	
-	results_page=params.get('results_page')
-	if results_page==None:
-		results_page=default_results_page
-	else:
-		results_page=int(results_page)
-	
-	start_idx=results_page*results_per_page
-	end_idx=(results_page+1)*results_per_page
 	
 	### NOW THE REAL VARIABLES
 	#the base queryset contains all voyages
@@ -150,7 +143,30 @@ def voyage_get(s,r):
 		#print(kwargs)
 		queryset=queryset.filter(**kwargs)
 	
-	queryset=queryset[start_idx:end_idx]
+		
+	#PAGINATION/LIMITS
+	## results_per_page
+	## results_page
+	if retrieve_all==False:
+		default_results_per_page=10
+		default_results_page=0
+		results_per_page=params.get('results_per_page')
+	
+		if results_per_page==None:
+			results_per_page=default_results_per_page
+		else:
+			results_per_page=int(results_per_page)
+	
+		results_page=params.get('results_page')
+		if results_page==None:
+			results_page=default_results_page
+		else:
+			results_page=int(results_page)
+	
+		start_idx=results_page*results_per_page
+		end_idx=(results_page+1)*results_per_page
+		queryset=queryset[start_idx:end_idx]
+
 	return queryset,selected_query_fields
 
 
@@ -170,8 +186,27 @@ class VoyageList(generics.GenericAPIView):
 class VoyageScatterDF(generics.GenericAPIView):
 	serializer_class=VoyageScatterDFSerializer
 	def get(self,request):
-		queryset,req_query_fields_IGNORE=voyage_get(self,request)
-		read_serializer=VoyageScatterDFSerializer(queryset,many=True)
-		return JsonResponse(read_serializer.data,safe=False)
+		queryset,req_query_fields_IGNORE=voyage_get(self,request,retrieve_all=True)
+		
+		serialized=VoyageScatterDFSerializer(queryset,many=True).data
+		serialized=json.loads(json.dumps(serialized))
+		output_dicts=[]
+		for i in serialized:
+			flat_dictionary=flatten(i)
+			output_dicts.append(flat_dictionary)
+		
+		keep_fields=scatter_plot_x_vars+scatter_plot_y_vars
+		
+		dict_keys=[i for i in output_dicts[0].keys()]
+		
+		final_dicts=[]
+		for d in output_dicts:
+			result_dict={}
+			for k in d:
+				if k in keep_fields:
+					result_dict[k]=d[k]
+			final_dicts.append(result_dict)
+		
+		return JsonResponse(final_dicts,safe=False)
 	
 		

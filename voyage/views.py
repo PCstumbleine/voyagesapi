@@ -190,23 +190,27 @@ class VoyageScatterDF(generics.GenericAPIView):
 		
 		serialized=VoyageScatterDFSerializer(queryset,many=True).data
 		serialized=json.loads(json.dumps(serialized))
+		print(serialized[0])
 		output_dicts=[]
 		for i in serialized:
 			flat_dictionary=flatten(i)
 			output_dicts.append(flat_dictionary)
 		
-		keep_fields=scatter_plot_x_vars+scatter_plot_y_vars
-		
+		keep_fields=scatter_plot_x_vars+scatter_plot_y_vars+scatter_plot_factors
+		keep_fields.append('voyage_id')
 		dict_keys=[i for i in output_dicts[0].keys()]
 		
-		final_dicts=[]
+		final_dicts={}
 		for d in output_dicts:
 			result_dict={}
+			voyage_id=d['voyage_id']
 			for k in d:
-				if k in keep_fields:
+				if k in keep_fields and k!='voyage_id':
 					result_dict[k]=d[k]
-			final_dicts.append(result_dict)
-		
+			final_dicts[voyage_id]=result_dict
+		'''d=open('example_output.json','w')
+		d.write(json.dumps(final_dicts))
+		d.close()'''		
 		return JsonResponse(final_dicts,safe=False)
 	
 		

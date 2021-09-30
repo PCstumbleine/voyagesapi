@@ -7,7 +7,8 @@ scatter_plot_x_vars=[
 	'voyage_crew__crew_voyage_outset',
 	'voyage_crew__crew_first_landing',
 	'voyage_slaves_numbers__imp_total_num_slaves_embarked',
-	'voyage_slaves_numbers__imp_total_num_slaves_disembarked'
+	'voyage_slaves_numbers__imp_total_num_slaves_disembarked',
+	'voyage_ship__imputed_nationality'
 ]
 
 scatter_plot_y_vars=[

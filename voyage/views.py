@@ -197,20 +197,14 @@ class VoyageScatterDF(generics.GenericAPIView):
 			output_dicts.append(flat_dictionary)
 		
 		keep_fields=scatter_plot_x_vars+scatter_plot_y_vars+scatter_plot_factors
-		keep_fields.append('voyage_id')
 		dict_keys=[i for i in output_dicts[0].keys()]
 		
-		final_dicts={}
+		final={k:[] for k in keep_fields}		
+		
 		for d in output_dicts:
-			result_dict={}
-			voyage_id=d['voyage_id']
-			for k in d:
-				if k in keep_fields and k!='voyage_id':
-					result_dict[k]=d[k]
-			final_dicts[voyage_id]=result_dict
-		'''d=open('example_output.json','w')
-		d.write(json.dumps(final_dicts))
-		d.close()'''		
-		return JsonResponse(final_dicts,safe=False)
+			for k in final:
+				final[k].append(d[k])
+		
+		return JsonResponse(final,safe=False)
 	
 		

@@ -198,7 +198,7 @@ class VoyageSerializer(DynamicFieldsModelSerializer):
 		
 		
 class VoyageScatterDFSerializer(DynamicFieldsModelSerializer):
-	voyage_ship=VoyageShipSerializer(selected_fields=['tonnage_mod'])
+	voyage_ship=VoyageShipSerializer(selected_fields=['tonnage_mod','imputed_nationality'])
 	voyage_dates=VoyageDatesSerializer(selected_fields=['imp_arrival_at_port_of_dis_year', 'imp_length_home_to_disembark','length_middle_passage_days'])
 	voyage_crew=VoyageCrewSerializer(selected_fields=['crew_voyage_outset','crew_first_landing'])
 	voyage_slaves_numbers=VoyageSlavesNumbersSerializer(selected_fields=['imp_total_num_slaves_embarked' ,'imp_total_num_slaves_disembarked','percentage_men','percentage_women','percentage_boy','percentage_girl','percentage_male','percentage_child','percentage_adult','percentage_female','imp_mortality_ratio','imp_jamaican_cash_price'])

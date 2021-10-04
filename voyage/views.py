@@ -5,8 +5,10 @@ from rest_framework.schemas.openapi import AutoSchema
 from rest_framework import generics
 from rest_framework.metadata import SimpleMetadata
 from rest_framework.response import Response
+from django.views.generic.list import ListView
 import json
 import requests
+import time
 from .models import Voyage
 from .serializers import *
 from .data_viz import *
@@ -88,9 +90,16 @@ def generic_options(s,r):
 	return schema
 
 #GENERIC FUNCTION TO RUN A GET CALL ON VOYAGE-LIKE SERIALIZERS
-def voyage_get(s,r,retrieve_all=False):
+def voyage_get(s,r,retrieve_all=False,prefetch_tables=[]):
 	queryset=Voyage.objects.all()
-	params=r.query_params
+	#params=r.query_params
+	params=r.GET
+	
+	queryset=Voyage.objects.all()
+	
+	for p in prefetch_tables:
+		print(p)
+		queryset=queryset.prefetch_related(Prefetch((p)))
 	
 	#FIELD SELECTION
 	## selected_fields
@@ -182,29 +191,43 @@ class VoyageList(generics.GenericAPIView):
 		read_serializer=VoyageSerializer(queryset,many=True,selected_fields=selected_query_fields)
 		return JsonResponse(read_serializer.data,safe=False)
 
+
+
+
 #VOYAGES DATAFRAME ENDPOINT (experimental and going to be a resource hog!)
-class VoyageScatterDF(generics.GenericAPIView):
-	serializer_class=VoyageScatterDFSerializer
+class VoyageScatterDF(ListView):
 	def get(self,request):
-		queryset,req_query_fields_IGNORE=voyage_get(self,request,retrieve_all=True)
+		times=[]
+		times.append(time.time())
 		
+		#the below still, unfortunately, needs to be hard-coded into the serializer
+		select_fields=list(set([i for i in scatter_plot_x_vars+scatter_plot_y_vars+scatter_plot_factors]))
+		
+		prefetch_tables=list(set([i.split('__')[0] for i in select_fields if '__' in i]))
+		print(prefetch_tables)
+		queryset,req_query_fields_IGNORE=voyage_get(self,request,retrieve_all=True,prefetch_tables=prefetch_tables)
+		
+		times.append(time.time())
 		serialized=VoyageScatterDFSerializer(queryset,many=True).data
+		times.append(time.time())
 		serialized=json.loads(json.dumps(serialized))
-		print(serialized[0])
+		times.append(time.time())
 		output_dicts=[]
 		for i in serialized:
 			flat_dictionary=flatten(i)
 			output_dicts.append(flat_dictionary)
-		
-		keep_fields=scatter_plot_x_vars+scatter_plot_y_vars+scatter_plot_factors
+		times.append(time.time())
 		dict_keys=[i for i in output_dicts[0].keys()]
 		
-		final={k:[] for k in keep_fields}		
+		final={k:[] for k in select_fields}		
 		
 		for d in output_dicts:
 			for k in final:
 				final[k].append(d[k])
+		times.append(time.time())
 		
+		for i in range(1,len(times)):
+			print(times[i]-times[i-1])
 		return JsonResponse(final,safe=False)
 	
 		

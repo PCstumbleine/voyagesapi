@@ -9,8 +9,24 @@ To launch the project
 	source venv/bin/activate
 	pip3 install -r requirements.txt
 
-
 The app has two working endpoints.
+
+### DataFrame endpoint for scatter plots: GET http call to 127.0.0.1:8000/voyage/table
+
+* This is an experiment for changing the way we do visualizations
+* Rather than
+	* Running a highly-targeted query based on the data needed for the viz
+	* And re-running that query for different fields as you change the variables
+* We instead
+	* Run a semi-targeted query based on the different variables of interest to that view
+	* Return a dataframe-like json object
+	* And then can re-present that dataframe in many different ways for that query
+* Downside: It's rather slow on any query because of the amount of data it pulls (but I've mitigated that somewhat by implementing prefetches)
+* Upside: Once you've loaded the dataframe, you can make many, many different graphs with it
+
+For instance, try GET http://127.0.0.1:8000/voyage/table?voyage_dates__imp_arrival_at_port_of_dis_year=1810,1812
+
+An implementation of this is available here: https://github.com/JohnMulligan/voyagesapi_plotly
 
 ### schema endpoint: OPTIONS http call to 127.0.0.1:8000/voyage/
 

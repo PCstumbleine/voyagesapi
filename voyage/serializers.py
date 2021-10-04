@@ -209,11 +209,3 @@ class VoyageScatterDFSerializer(DynamicFieldsModelSerializer):
 
 	
 	
-	
-	
-	
-	
-	
-	
-	
-	

@@ -11,7 +11,7 @@ To launch the project
 
 The app has two working endpoints.
 
-### DataFrame endpoint for scatter plots: GET http call to 127.0.0.1:8000/voyage/table
+### DataFrame endpoint for scatter plots: GET http call to 127.0.0.1:8000/voyage/scatterdf/
 
 * This is an experiment for changing the way we do visualizations
 * Rather than

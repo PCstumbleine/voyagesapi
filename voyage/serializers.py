@@ -207,5 +207,63 @@ class VoyageScatterDFSerializer(DynamicFieldsModelSerializer):
 		model=Voyage
 		fields='__all__'
 
+class VoyageSunburstDFSerializer(DynamicFieldsModelSerializer):
 	
+	voyage_itinerary=VoyageItinerarySerializer(selected_fields=[
+		'first_landing_region',
+		'first_region_slave_emb',
+		'imp_principal_region_of_slave_purchase',
+		'imp_principal_region_slave_dis',
+		'imp_region_voyage_begin',
+		'int_first_region_purchase_slaves',
+		'int_first_region_slave_landing',
+		'int_second_place_region_slave_landing',
+		'int_second_region_purchase_slaves',
+		'second_landing_region',
+		'second_region_slave_emb',
+		'third_landing_region',
+		'third_region_slave_emb',
+		'first_landing_place',
+		'first_place_slave_purchase',
+		'imp_principal_place_of_slave_purchase',
+		'int_second_place_region_slave_landing',
+		'principal_place_of_slave_purchase',
+		'second_landing_place',
+		'second_place_slave_purchase',
+		'third_landing_place',
+		'third_place_slave_purchase',
+		'imp_broad_region_of_slave_purchase',
+		'imp_broad_region_slave_dis',
+		'imp_broad_region_voyage_begin'
+	])
 	
+	voyage_dates=VoyageDatesSerializer(selected_fields=[
+		'length_middle_passage_days',
+		'imp_length_home_to_disembark'
+	])
+	
+	voyage_crew=VoyageCrewSerializer(selected_fields=[
+		'crew_voyage_outset',
+		'crew_first_landing'
+	])
+	
+	voyage_slaves_numbers=VoyageSlavesNumbersSerializer(selected_fields=[
+		'imp_total_num_slaves_embarked',
+		'imp_total_num_slaves_disembarked',
+		'percentage_men',
+		'percentage_women',
+		'percentage_boy',
+		'percentage_girl',
+		'percentage_male',
+		'percentage_child',
+		'percentage_adult',
+		'percentage_female',
+		'imp_mortality_ratio',
+		'imp_jamaican_cash_price'
+	])
+	
+	voyage_ship=VoyageShipSerializer(selected_fields=['tonnage_mod'])
+	
+	class Meta:
+		model=Voyage
+		fields='__all__'

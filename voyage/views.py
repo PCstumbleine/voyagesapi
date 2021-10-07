@@ -194,7 +194,7 @@ class VoyageList(generics.GenericAPIView):
 
 
 
-#VOYAGES DATAFRAME ENDPOINT (experimental and going to be a resource hog!)
+#VOYAGES SCATTER DATAFRAME ENDPOINT (experimental and going to be a resource hog!)
 class VoyageScatterDF(ListView):
 	def get(self,request):
 		times=[]
@@ -229,5 +229,41 @@ class VoyageScatterDF(ListView):
 		for i in range(1,len(times)):
 			print(times[i]-times[i-1])
 		return JsonResponse(final,safe=False)
-	
+
+#VOYAGES SUNBURST DATAFRAME ENDPOINT (this one is even worse -- huge number of vars)
+class VoyageSunburstDF(ListView):
+	def get(self,request):
+		times=[]
+		times.append(time.time())
+		
+		#the below still, unfortunately, needs to be hard-coded into the serializer
+		select_fields=list(set([i for i in sunburst_plot_values+geo_sunburst_place_vars+geo_sunburst_region_vars+geo_sunburst_broadregion_vars]))
+		print(select_fields)
+		prefetch_tables=list(set([i.split('__')[0] for i in select_fields if '__' in i]))
+		print(prefetch_tables)
+		queryset,req_query_fields_IGNORE=voyage_get(self,request,retrieve_all=True,prefetch_tables=prefetch_tables)		
+		times.append(time.time())
+		serialized=VoyageSunburstDFSerializer(queryset,many=True).data
+		times.append(time.time())
+		serialized=json.loads(json.dumps(serialized))
+		times.append(time.time())
+		output_dicts=[]
+		for i in serialized:
+			flat_dictionary=flatten(i)
+			output_dicts.append(flat_dictionary)
+		times.append(time.time())
+		dict_keys=[i for i in output_dicts[0].keys()]
+		
+		final={k:[] for k in select_fields}		
+		print(dict_keys)
+		for d in output_dicts:
+			for k in final:
+				final[k].append(d[k])
+		times.append(time.time())
+		
+		for i in range(1,len(times)):
+			print(times[i]-times[i-1])
+		return JsonResponse(final,safe=False)
+
+
 		

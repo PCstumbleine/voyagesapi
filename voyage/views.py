@@ -12,6 +12,7 @@ import time
 from .models import Voyage
 from .serializers import *
 from .data_viz import *
+from .prefetch_settings import *
 
 ##RECURSIVE DRILL-DOWN INTO A SCHEMA, GETS ALL ITS FIELDS, THEIR LABELS, AND DATATYPES
 def deserializer(schema,base_address,serializer):	
@@ -68,7 +69,6 @@ def addlevel(thisdict,keychain,payload):
 #GENERIC FUNCTION TO RUN A CUSTOMIZABLE OPTIONS CALL ON A SERIALIZER
 def generic_options(s,r):
 	#GETS A FLAT VERSION OF THE SCHEMA WITH DOUBLE-UNDERSCORES FOR NESTED RELATIONS
-	print(s,r)
 	schema=deserializer({},base_address='',serializer=s.get_serializer())
 	
 	#CAN, ON REQUEST, TURN THAT INTO A NESTED LIST
@@ -90,31 +90,37 @@ def generic_options(s,r):
 	return schema
 
 #GENERIC FUNCTION TO RUN A GET CALL ON VOYAGE-LIKE SERIALIZERS
-def voyage_get(s,r,retrieve_all=False,prefetch_tables=[]):
+def voyage_get(s,r,retrieve_all=False):
 	queryset=Voyage.objects.all()
 	#params=r.query_params
 	params=r.GET
 	
+	
+	
 	queryset=Voyage.objects.all()
 	
-	for p in prefetch_tables:
-		print(p)
+	for p in prefetch_tables+prefetch_vars:
 		queryset=queryset.prefetch_related(Prefetch((p)))
 	
 	#FIELD SELECTION
 	## selected_fields
 	### currently can only select tables one level down -- all the subsidiary fields come with it
 	selected_fields=params.get('selected_fields')
+	#print("====",selected_fields)
+	print("*******",params.get('selected_fields'))
 	if selected_fields!=None:
-		selected_query_fields=(i for i in selected_fields.split(','))
+		selected_query_fields=[i for i in selected_fields.split(',')]
 	else:
 		selected_query_fields=None
+	print("*******",selected_query_fields)
+	
+	
+	#print("====",selected_query_fields)
 	
 	### NOW THE REAL VARIABLES
 	#the base queryset contains all voyages
 	#on stacking query vars: https://docs.djangoproject.com/en/3.2/topics/db/queries/#querysets-are-lazy
 	
-
 	####VOYAGE_ID COMMA-SEPARATED INTEGERS
 	#now we just have to enumerate our varibles and build filters for them.
 	voyage_ids=params.get('voyage_ids')
@@ -122,15 +128,19 @@ def voyage_get(s,r,retrieve_all=False,prefetch_tables=[]):
 		voyage_id=[int(i) for i in voyage_ids.split(',')]
 		queryset = queryset.filter(voyage_id__in=voyage_id)
 	
+	print('voyage_ids')
+	
 	#the below variables (numeric_fields, text_fields) were previously defined in fields.py (deleted)
 	#now they are defined with a live call to the options endpoint
 	#right now I'm assuming only two types of field: text and numeric
 	#This live call slows things down, obviously, so it will be a good idea to have some caching in place
-	r=requests.options('http://127.0.0.1:8000/voyage/')
-	all_voyage_fields=json.loads(r.text)
+	res=requests.options('http://127.0.0.1:8000/voyage/')
+	all_voyage_fields=json.loads(res.text)
 	text_fields=[i for i in all_voyage_fields if 'CharField' in all_voyage_fields[i]['type']]
 	numeric_fields=[i for i in all_voyage_fields if i not in text_fields]
 	active_numeric_search_fields=[i for i in set(params).intersection(set(numeric_fields))]
+	
+	print('options')
 	
 	if len(active_numeric_search_fields)>0:
 	
@@ -142,6 +152,8 @@ def voyage_get(s,r,retrieve_all=False,prefetch_tables=[]):
 			}
 		queryset=queryset.filter(**kwargs)
 	
+	print('numeric_filtered')
+	
 	active_text_search_fields=[i for i in set(params).intersection(set(text_fields))]
 	if len(active_text_search_fields)>0:
 		for field in active_text_search_fields:
@@ -152,6 +164,7 @@ def voyage_get(s,r,retrieve_all=False,prefetch_tables=[]):
 		#print(kwargs)
 		queryset=queryset.filter(**kwargs)
 	
+	print('text_filtered')
 		
 	#PAGINATION/LIMITS
 	## results_per_page
@@ -175,6 +188,8 @@ def voyage_get(s,r,retrieve_all=False,prefetch_tables=[]):
 		start_idx=results_page*results_per_page
 		end_idx=(results_page+1)*results_per_page
 		queryset=queryset[start_idx:end_idx]
+	
+	print('pagination')
 
 	return queryset,selected_query_fields
 
@@ -193,102 +208,13 @@ class VoyageList(generics.GenericAPIView):
 
 
 
-
 #VOYAGES SCATTER DATAFRAME ENDPOINT (experimental and going to be a resource hog!)
-class VoyageScatterDF(ListView):
+class VoyageScatterDF(generics.GenericAPIView):
 	def get(self,request):
-		times=[]
-		times.append(time.time())
-		
-		#the below still, unfortunately, needs to be hard-coded into the serializer
-		select_fields=list(set([i for i in scatter_plot_x_vars+scatter_plot_y_vars+scatter_plot_factors]))
-		
-		prefetch_tables=list(set([i.split('__')[0] for i in select_fields if '__' in i]))
-		print(prefetch_tables)
-		queryset,req_query_fields_IGNORE=voyage_get(self,request,retrieve_all=True,prefetch_tables=prefetch_tables)
-		
-		times.append(time.time())
-		serialized=VoyageScatterDFSerializer(queryset,many=True).data
-		times.append(time.time())
-		serialized=json.loads(json.dumps(serialized))
-		times.append(time.time())
-		output_dicts=[]
-		for i in serialized:
-			flat_dictionary=flatten(i)
-			output_dicts.append(flat_dictionary)
-		times.append(time.time())
-		dict_keys=[i for i in output_dicts[0].keys()]
-		
-		final={k:[] for k in select_fields}		
-		
-		for d in output_dicts:
-			for k in final:
-				final[k].append(d[k])
-		times.append(time.time())
-		
-		for i in range(1,len(times)):
-			print(times[i]-times[i-1])
-		return JsonResponse(final,safe=False)
-
-#VOYAGES SUNBURST DATAFRAME ENDPOINT (this one is even worse -- huge number of vars)
-class VoyageSunburstDF(ListView):
-	def get(self,request):
-		times=[]
-		times.append(time.time())
-		
-		#the below still, unfortunately, needs to be hard-coded into the serializer
-		select_fields=list(set([i for i in sunburst_plot_values+geo_sunburst_place_vars+geo_sunburst_region_vars+geo_sunburst_broadregion_vars]))
-		#THIS ONE SUCKS BUT IT'S ELEGANT
-		##prefetch_tables=list(set([i.split('__')[0] for i in select_fields if '__' in i]))
-		
-		##THIS IS THE FASTEST SO FAR BUT IT'S UGLY
-		'''exclude_prefetch=[
-			'voyage_crew__crew_first_landing',
-			'voyage_slaves_numbers__percentage_girl',
-			'voyage_slaves_numbers__percentage_child',
-			'voyage_slaves_numbers__imp_total_num_slaves_disembarked',
-			'voyage_dates__length_middle_passage_days',
-			'voyage_crew__crew_voyage_outset',
-			'voyage_slaves_numbers__percentage_women',
-			'voyage_dates__imp_length_home_to_disembark',
-			'voyage_slaves_numbers__percentage_boy',
-			'voyage_slaves_numbers__percentage_male',
-			'voyage_slaves_numbers__percentage_adult',
-			'voyage_slaves_numbers__percentage_female',
-			'voyage_slaves_numbers__imp_jamaican_cash_price',
-			'voyage_slaves_numbers__percentage_men',
-			'voyage_ship__tonnage_mod',
-			'voyage_slaves_numbers__imp_mortality_ratio',
-			'voyage_slaves_numbers__imp_total_num_slaves_embarked'
-			]
-		prefetch_tables=list(set([i for i in select_fields if i not in exclude_prefetch]))+['voyage_slaves_numbers','voyage_dates','voyage_crew','voyage_ship']
-		'''
-		
-		prefetch_tables=['voyage_ship_tonnage_mod']
-		
-		#print(prefetch_tables)
-		queryset,req_query_fields_IGNORE=voyage_get(self,request,retrieve_all=True,prefetch_tables=prefetch_tables)		
-		times.append(time.time())
-		serialized=VoyageSunburstDFSerializer(queryset,many=True).data
-		times.append(time.time())
-		serialized=json.loads(json.dumps(serialized))
-		times.append(time.time())
-		output_dicts=[]
-		for i in serialized:
-			flat_dictionary=flatten(i)
-			output_dicts.append(flat_dictionary)
-		times.append(time.time())
-		dict_keys=[i for i in output_dicts[0].keys()]
-		
-		final={k:[] for k in select_fields}		
-		#print(dict_keys)
-		for d in output_dicts:
-			for k in final:
-				final[k].append(d[k])
-		times.append(time.time())
-		
-		for i in range(1,len(times)):
-			print(times[i]-times[i-1])
-		return JsonResponse(final,safe=False)
+		queryset,selected_query_fields=voyage_get(self,request,retrieve_all=True)
+		print(queryset,selected_query_fields)
+		serialized=VoyageSerializer(queryset,selected_fields=selected_query_fields,many=True).data
+		print(serialized)
+		return JsonResponse(serialized,safe=False)
 
 

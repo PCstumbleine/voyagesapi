@@ -238,8 +238,34 @@ class VoyageSunburstDF(ListView):
 		
 		#the below still, unfortunately, needs to be hard-coded into the serializer
 		select_fields=list(set([i for i in sunburst_plot_values+geo_sunburst_place_vars+geo_sunburst_region_vars+geo_sunburst_broadregion_vars]))
-		#print(select_fields)
-		prefetch_tables=list(set([i.split('__')[0] for i in select_fields if '__' in i]))
+		#THIS ONE SUCKS BUT IT'S ELEGANT
+		##prefetch_tables=list(set([i.split('__')[0] for i in select_fields if '__' in i]))
+		
+		##THIS IS THE FASTEST SO FAR BUT IT'S UGLY
+		'''exclude_prefetch=[
+			'voyage_crew__crew_first_landing',
+			'voyage_slaves_numbers__percentage_girl',
+			'voyage_slaves_numbers__percentage_child',
+			'voyage_slaves_numbers__imp_total_num_slaves_disembarked',
+			'voyage_dates__length_middle_passage_days',
+			'voyage_crew__crew_voyage_outset',
+			'voyage_slaves_numbers__percentage_women',
+			'voyage_dates__imp_length_home_to_disembark',
+			'voyage_slaves_numbers__percentage_boy',
+			'voyage_slaves_numbers__percentage_male',
+			'voyage_slaves_numbers__percentage_adult',
+			'voyage_slaves_numbers__percentage_female',
+			'voyage_slaves_numbers__imp_jamaican_cash_price',
+			'voyage_slaves_numbers__percentage_men',
+			'voyage_ship__tonnage_mod',
+			'voyage_slaves_numbers__imp_mortality_ratio',
+			'voyage_slaves_numbers__imp_total_num_slaves_embarked'
+			]
+		prefetch_tables=list(set([i for i in select_fields if i not in exclude_prefetch]))+['voyage_slaves_numbers','voyage_dates','voyage_crew','voyage_ship']
+		'''
+		
+		prefetch_tables=['voyage_ship_tonnage_mod']
+		
 		#print(prefetch_tables)
 		queryset,req_query_fields_IGNORE=voyage_get(self,request,retrieve_all=True,prefetch_tables=prefetch_tables)		
 		times.append(time.time())
@@ -266,4 +292,3 @@ class VoyageSunburstDF(ListView):
 		return JsonResponse(final,safe=False)
 
 
-		

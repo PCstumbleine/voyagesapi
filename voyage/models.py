@@ -1669,7 +1669,7 @@ class VoyageSources(models.Model):
 	# Might contain HTML text formatting
 	full_ref = models.CharField(_('Full reference'),
 								max_length=2550, null=False, blank=True)
-	source_type = models.ForeignKey('VoyageSourcesType', verbose_name="Source Tupe", null=False,
+	source_type = models.ForeignKey('VoyageSourcesType', verbose_name="Source Type", null=False,
 									on_delete=models.CASCADE)
 
 	class Meta:

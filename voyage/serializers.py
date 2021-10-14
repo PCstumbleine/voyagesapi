@@ -200,10 +200,8 @@ class VoyageSerializer(DynamicFieldsModelSerializer):
 			"voyage_outcomes":["VoyageOutcomeSerializer","many=True,read_only=True,excluded_fields=('id','voyage')"]
 		}
 		
-		print('+++++++++',selected_fieldnames)
 		if selected_fieldnames==['voyage_id']:
-			print('----->voyageidonly')
-			self.fields='voyage_id'
+			self.fields=['voyage_id']
 		elif selected_fieldnames != None:
 			selected_fields={}
 			for s in selected_fieldnames:
@@ -214,9 +212,8 @@ class VoyageSerializer(DynamicFieldsModelSerializer):
 					selected_fields[table].append(field)
 			for tablename in selected_fields:
 				serializercall="%s(%s,selected_fields=['%s'])" %(tabledict[tablename][0],tabledict[tablename][1],'\',\''.join(selected_fields[tablename]))
-				print(serializercall)
 				self.fields[tablename]=eval(serializercall)
 		else:
-			for table in tabledict:
-				serializercall="%s(%s)" %(tabledict[table][0],tabledict[table][1])
-				self.fields[table]=eval(serializercall)
+			for tablename in tabledict:
+				serializercall="%s(%s)" %(tabledict[tablename][0],tabledict[tablename][1])
+				self.fields[tablename]=eval(serializercall)

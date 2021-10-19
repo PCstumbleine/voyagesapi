@@ -2,7 +2,7 @@ from rest_framework import serializers
 from rest_framework.fields import SerializerMethodField,IntegerField,CharField
 import re
 from .models import *
-from .data_viz import *
+
 
 
 #https://www.django-rest-framework.org/api-guide/serializers/#dynamically-modifying-fields
@@ -200,9 +200,6 @@ class VoyageDatesSerializer(DynamicFieldsModelSerializer):
 	class Meta:
 		model=VoyageDates
 		fields='__all__'
-
-
-
 
 class VoyageSerializer(DynamicFieldsModelSerializer):
 	

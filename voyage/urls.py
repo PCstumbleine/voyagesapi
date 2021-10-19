@@ -4,5 +4,5 @@ from . import views
 
 urlpatterns = [
     path('', views.VoyageList.as_view()),
-    path('scatterdf',views.VoyageScatterDF.as_view())
+    path('dataframes',views.VoyageDataFrames.as_view())
     ]

@@ -11,7 +11,7 @@ import requests
 import time
 from .models import Voyage
 from .serializers import *
-from .data_viz import *
+
 from .prefetch_settings import *
 
 ##RECURSIVE DRILL-DOWN INTO A SCHEMA, GETS ALL ITS FIELDS, THEIR LABELS, AND DATATYPES
@@ -199,10 +199,8 @@ class VoyageList(generics.GenericAPIView):
 		read_serializer=VoyageSerializer(queryset,many=True,selected_fields=selected_query_fields)
 		return JsonResponse(read_serializer.data,safe=False)
 
-
-
 #VOYAGES SCATTER DATAFRAME ENDPOINT (experimental and going to be a resource hog!)
-class VoyageScatterDF(generics.GenericAPIView):
+class VoyageDataFrames(generics.GenericAPIView):
 	def get(self,request):
 		times=[]
 		times.append(time.time())

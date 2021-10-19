@@ -61,6 +61,7 @@ next up:
 * experiment performance with
 	* complex searches
 	* better-tailored dataframe selection (the data-heavy graphs are impressive for their interactivity but it is slow)
+	* alternatively, creative ways of adding to dataframes, like fetching one year at a time and updating the graph as you go....
 * experiment with caching
 
 ## OPTIONS endpoint: OPTIONS http call to 127.0.0.1:8000/voyage/

@@ -97,9 +97,13 @@ def voyage_get(s,r,retrieve_all=False):
 	
 	queryset=Voyage.objects.all()
 	
-	for p in prefetch_tables+prefetch_vars:
-		queryset=queryset.prefetch_related(Prefetch((p)))
+	'''for p in prefetch_tables+prefetch_vars:
+		queryset=queryset.prefetch_related(Prefetch((p)))'''
 	
+	prefetch_tables=['voyage_dates','voyage_itinerary','voyage_slaves_numbers','voyage_crew','voyage_ship']
+	for p in prefetch_tables:
+		print(p)
+		queryset=queryset.prefetch_related(Prefetch((p)))
 	#FIELD SELECTION
 	## selected_fields
 	### currently can only select tables one level down -- all the subsidiary fields come with it
@@ -113,7 +117,7 @@ def voyage_get(s,r,retrieve_all=False):
 	
 	
 	
-	print("====",selected_query_fields)
+	#print("====",selected_query_fields)
 	
 	### NOW THE REAL VARIABLES
 	#the base queryset contains all voyages
@@ -130,8 +134,8 @@ def voyage_get(s,r,retrieve_all=False):
 	#now they are defined with a live call to the options endpoint
 	#right now I'm assuming only two types of field: text and numeric
 	#This live call slows things down, obviously, so it will be a good idea to have some caching in place
-	res=requests.options('http://127.0.0.1:8000/voyage/')
-	all_voyage_fields=json.loads(res.text)
+	r=requests.options('http://127.0.0.1:8000/voyage/')
+	all_voyage_fields=json.loads(r.text)
 	text_fields=[i for i in all_voyage_fields if 'CharField' in all_voyage_fields[i]['type']]
 	numeric_fields=[i for i in all_voyage_fields if i not in text_fields]
 	active_numeric_search_fields=[i for i in set(params).intersection(set(numeric_fields))]
@@ -200,21 +204,28 @@ class VoyageList(generics.GenericAPIView):
 #VOYAGES SCATTER DATAFRAME ENDPOINT (experimental and going to be a resource hog!)
 class VoyageScatterDF(generics.GenericAPIView):
 	def get(self,request):
+		times=[]
+		times.append(time.time())
 		select_fields=request.GET['selected_fields'].split(',')
 		queryset,req_query_fields_IGNORE=voyage_get(self,request,retrieve_all=True)
-		serialized=VoyageSerializer(queryset,many=True).data
+		times.append(time.time())
+		serialized=VoyageSerializer(queryset,many=True,selected_fields=select_fields).data
+		times.append(time.time())
 		serialized=json.loads(json.dumps(serialized))
+		times.append(time.time())
 		output_dicts=[]
 		for i in serialized:
 			flat_dictionary=flatten(i)
 			output_dicts.append(flat_dictionary)
+		times.append(time.time())
 		dict_keys=[i for i in output_dicts[0].keys()]
-		
 		final={k:[] for k in select_fields}		
-		
+		times.append(time.time())
 		for d in output_dicts:
 			for k in final:
 				final[k].append(d[k])
+		for i in range(1,len(times)):
+			print(times[i]-times[i-1])
 		return JsonResponse(final,safe=False)
 
 

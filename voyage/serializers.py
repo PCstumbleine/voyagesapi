@@ -30,6 +30,29 @@ class DynamicFieldsModelSerializer(serializers.ModelSerializer):
 			for field_name in existing.intersection(disallowed):
 				self.fields.pop(field_name)
 
+class DynamicFieldsModelSerializer2(serializers.ModelSerializer):
+	"""
+	A ModelSerializer that takes an additional `fields` argument that
+	controls which fields should be displayed.
+	"""
+	def __init__(self, *args, **kwargs):
+		# Don't pass the 'fields' arg up to the superclass
+		#help(self)
+		selected_fields = kwargs.pop('selected_fields', None)
+		excluded_fields=kwargs.pop('excluded_fields',None)
+		super(DynamicFieldsModelSerializer2, self).__init__(*args, **kwargs)
+		
+		if selected_fields is not None:
+			# Drop any fields that are not specified in the `fields` argument.
+			allowed = set(selected_fields)
+			existing = set(self.fields)
+			for field_name in existing - allowed:
+				self.fields.pop(field_name)
+		if excluded_fields is not None:
+			disallowed=set(excluded_fields)
+			existing=set(self.fields)
+			for field_name in existing.intersection(disallowed):
+				self.fields.pop(field_name)
 
 
 ##### GEO ##### 
@@ -177,6 +200,9 @@ class VoyageDatesSerializer(DynamicFieldsModelSerializer):
 	class Meta:
 		model=VoyageDates
 		fields='__all__'
+
+
+
 
 class VoyageSerializer(DynamicFieldsModelSerializer):
 	

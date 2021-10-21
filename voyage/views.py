@@ -92,18 +92,13 @@ def generic_options(s,r):
 #GENERIC FUNCTION TO RUN A GET CALL ON VOYAGE-LIKE SERIALIZERS
 def voyage_get(s,r,retrieve_all=False):
 	queryset=Voyage.objects.all()
-	#params=r.query_params
+	#params=r.query_params // some of the request types are handled differently. had to use this at one point & don't want to forget
 	params=r.GET
 	
-	queryset=Voyage.objects.all()
-	
-	'''for p in prefetch_tables+prefetch_vars:
-		queryset=queryset.prefetch_related(Prefetch((p)))'''
-	
-	prefetch_tables=['voyage_dates','voyage_itinerary','voyage_slaves_numbers','voyage_crew','voyage_ship']
-	for p in prefetch_tables:
+	for p in prefetch_tables+prefetch_vars:
 		print(p)
-		queryset=queryset.prefetch_related(Prefetch((p)))
+		queryset=queryset.prefetch_related(p)
+	
 	#FIELD SELECTION
 	## selected_fields
 	### currently can only select tables one level down -- all the subsidiary fields come with it
@@ -114,10 +109,6 @@ def voyage_get(s,r,retrieve_all=False):
 		selected_query_fields=[i for i in selected_fields.split(',')]
 	else:
 		selected_query_fields=None
-	
-	
-	
-	#print("====",selected_query_fields)
 	
 	### NOW THE REAL VARIABLES
 	#the base queryset contains all voyages

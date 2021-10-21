@@ -96,7 +96,7 @@ def voyage_get(s,r,retrieve_all=False):
 	params=r.GET
 	
 	for p in prefetch_tables+prefetch_vars:
-		print(p)
+		#print(p)
 		queryset=queryset.prefetch_related(p)
 	
 	#FIELD SELECTION

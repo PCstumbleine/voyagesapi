@@ -37,7 +37,8 @@ next up:
 
 For instance, try
 
-	GET http://127.0.0.1:8000/voyage/?selected_fields=voyage_ship,voyage_ship_owner&voyage_ship_owner__name=Domingos%20Pacheco
+	GET http://127.0.0.1:8000/voyage/?voyage_ship_owner__name=Domingos%20Pacheco&selected_fields=voyage_ship_owner__name
+	GET http://127.0.0.1:8000/voyage/?selected_fields=voyage_dates__imp_arrival_at_port_of_dis_year,voyage_slaves_numbers__imp_total_num_slaves_disembarked&voyage_dates__imp_arrival_at_port_of_dis_year=1810,1812
 
 next up:
 
@@ -53,7 +54,7 @@ next up:
 
 For instance, try
 
-	GET http://127.0.0.1:8000/voyage/dataframes?voyage_dates__imp_arrival_at_port_of_dis_year=1810,1812
+	GET http://127.0.0.1:8000/voyage/dataframes?voyage_dates__imp_arrival_at_port_of_dis_year=1810,1812&selected_fields=voyage_dates__imp_arrival_at_port_of_dis_year,voyage_slaves_numbers__imp_total_num_slaves_disembarked
 
 next up:
 

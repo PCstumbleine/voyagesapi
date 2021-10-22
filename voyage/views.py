@@ -95,6 +95,8 @@ def voyage_get(s,r,retrieve_all=False):
 	#params=r.query_params // some of the request types are handled differently. had to use this at one point & don't want to forget
 	params=r.GET
 	
+	#There are some real benefits to tuning this further. Right now I'm prefetching everything.
+	#It pays off in terms of speed generally, but there is a bit of overhead with each prefetch.
 	for p in prefetch_tables+prefetch_vars:
 		#print(p)
 		queryset=queryset.prefetch_related(p)

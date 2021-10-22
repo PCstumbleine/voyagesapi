@@ -15,13 +15,13 @@ from .serializers import *
 from .prefetch_settings import *
 
 ##RECURSIVE DRILL-DOWN INTO A SCHEMA, GETS ALL ITS FIELDS, THEIR LABELS, AND DATATYPES
-def deserializer(schema,base_address,serializer):	
+def deserializer(schema,base_address,serializer):
 	try:
 		fields=serializer.fields.__dict__['fields']
 	except:
 		#this (unintelligently) handles through fields
 		fields=serializer.__dict__['child'].fields
-		
+
 	for field in fields:
 		datatypestr=str(type(fields[field]))
 		if base_address!='':
@@ -39,7 +39,7 @@ def deserializer(schema,base_address,serializer):
 			schema=deserializer(schema,address,fields[field])
 		else:
 			label=fields[field].label
-			schema[address]={'type':datatypestr,'label':label}	
+			schema[address]={'type':datatypestr,'label':label}
 	return schema
 
 
@@ -70,14 +70,14 @@ def addlevel(thisdict,keychain,payload):
 def generic_options(s,r):
 	#GETS A FLAT VERSION OF THE SCHEMA WITH DOUBLE-UNDERSCORES FOR NESTED RELATIONS
 	schema=deserializer({},base_address='',serializer=s.get_serializer())
-	
+
 	#CAN, ON REQUEST, TURN THAT INTO A NESTED LIST
 	if 'hierarchical' in r.query_params:
 		if r.query_params['hierarchical'].lower() in ['true','1','y']:
 			hierarchical=True
 	else:
 			hierarchical=False
-	
+
 	unwound={}
 	if hierarchical:
 		for i in schema:
@@ -94,35 +94,35 @@ def voyage_get(s,r,retrieve_all=False):
 	queryset=Voyage.objects.all()
 	#params=r.query_params // some of the request types are handled differently. had to use this at one point & don't want to forget
 	params=r.GET
-	
+
 	#There are some real benefits to tuning this further. Right now I'm prefetching everything.
 	#It pays off in terms of speed generally, but there is a bit of overhead with each prefetch.
 	for p in prefetch_tables+prefetch_vars:
 		#print(p)
 		queryset=queryset.prefetch_related(p)
-	
+
 	#FIELD SELECTION
 	## selected_fields
 	### currently can only select tables one level down -- all the subsidiary fields come with it
 	selected_fields=params.get('selected_fields')
 	#print("====",selected_fields)
-	
+
 	if selected_fields!=None:
 		selected_query_fields=[i for i in selected_fields.split(',')]
 	else:
 		selected_query_fields=None
-	
+
 	### NOW THE REAL VARIABLES
 	#the base queryset contains all voyages
 	#on stacking query vars: https://docs.djangoproject.com/en/3.2/topics/db/queries/#querysets-are-lazy
-	
+
 	####VOYAGE_ID COMMA-SEPARATED INTEGERS
 	#now we just have to enumerate our varibles and build filters for them.
 	voyage_ids=params.get('voyage_ids')
 	if voyage_ids!=None:
 		voyage_id=[int(i) for i in voyage_ids.split(',')]
 		queryset = queryset.filter(voyage_id__in=voyage_id)
-	
+
 	#the below variables (numeric_fields, text_fields) were previously defined in fields.py (deleted)
 	#now they are defined with a live call to the options endpoint
 	#right now I'm assuming only two types of field: text and numeric
@@ -132,9 +132,9 @@ def voyage_get(s,r,retrieve_all=False):
 	text_fields=[i for i in all_voyage_fields if 'CharField' in all_voyage_fields[i]['type']]
 	numeric_fields=[i for i in all_voyage_fields if i not in text_fields]
 	active_numeric_search_fields=[i for i in set(params).intersection(set(numeric_fields))]
-	
+
 	if len(active_numeric_search_fields)>0:
-	
+
 		for field in active_numeric_search_fields:
 			min,max=[float(i) for i in params.get(field).split(',')]
 			kwargs = {
@@ -142,7 +142,7 @@ def voyage_get(s,r,retrieve_all=False):
 			'{0}__{1}'.format(field, 'gte'): min
 			}
 		queryset=queryset.filter(**kwargs)
-	
+
 	active_text_search_fields=[i for i in set(params).intersection(set(text_fields))]
 	if len(active_text_search_fields)>0:
 		for field in active_text_search_fields:
@@ -152,8 +152,8 @@ def voyage_get(s,r,retrieve_all=False):
 			}
 		#print(kwargs)
 		queryset=queryset.filter(**kwargs)
-	
-		
+
+
 	#PAGINATION/LIMITS
 	## results_per_page
 	## results_page
@@ -161,18 +161,18 @@ def voyage_get(s,r,retrieve_all=False):
 		default_results_per_page=10
 		default_results_page=0
 		results_per_page=params.get('results_per_page')
-	
+
 		if results_per_page==None:
 			results_per_page=default_results_per_page
 		else:
 			results_per_page=int(results_per_page)
-	
+
 		results_page=params.get('results_page')
 		if results_page==None:
 			results_page=default_results_page
 		else:
 			results_page=int(results_page)
-	
+
 		start_idx=results_page*results_per_page
 		end_idx=(results_page+1)*results_per_page
 		queryset=queryset[start_idx:end_idx]
@@ -210,7 +210,7 @@ class VoyageDataFrames(generics.GenericAPIView):
 			output_dicts.append(flat_dictionary)
 		times.append(time.time())
 		dict_keys=[i for i in output_dicts[0].keys()]
-		final={k:[] for k in select_fields}		
+		final={k:[] for k in select_fields}
 		times.append(time.time())
 		for d in output_dicts:
 			for k in final:
@@ -218,5 +218,3 @@ class VoyageDataFrames(generics.GenericAPIView):
 		for i in range(1,len(times)):
 			print(times[i]-times[i-1])
 		return JsonResponse(final,safe=False)
-
-

@@ -1,20 +1,64 @@
-
-## Voyages REST API, 2021
+# Voyages REST API 2021
 
 This is an attempt to rebuild the Voyages API with as few dependencies as possible in the latest versions of django and python
 
-To launch the project
+## Local Deployment
 
-	python3 -m venv venv
-	source venv/bin/activate
-	pip3 install -r requirements.txt
+Create an external Docker network.
 
-## 2 GET endpoints
+```bash
+host:~/Projects/voyagesapi$ docker network create voyagesapi
+```
 
-Both allow you to:
+Build and run the containers.
+
+```bash
+host:~/Projects/voyagesapi$ docker-compose up -d --build
+```
+
+Create the database.
+
+```bash
+host:~/Projects/voyagesapi$ docker exec -i voyagesapi-mysql mysql -uroot -pvoyages -e "create database voyages"
+```
+
+Import the database dump to MySQL.
+
+```bash
+host:~/Projects/voyagesapi$ docker exec -i voyagesapi-mysql mysql -uroot -pvoyages voyages < data/voyagesapi.sql
+```
+
+View container logs.
+
+```bash
+host:~/Projects/voyagesapi$ docker logs voyagesapi-django
+host:~/Projects/voyagesapi$ docker logs voyagesapi-mysql
+```
+
+*The Adminer app is provided as an additional way to work with the database.*
+
+Note the following project resources:
+
+* Voyages API: http://127.0.0.1:8000/
+* Adminer: http://127.0.0.1:8080
+
+## Cleanup
+
+```bash
+host:~/Projects/voyagesapi$ docker-compose down
+
+host:~/Projects/voyagesapi$ docker container prune
+host:~/Projects/voyagesapi$ docker image prune
+host:~/Projects/voyagesapi$ docker volume prune
+host:~/Projects/voyagesapi$ docker network prune
+```
+
+## API Endpoints
+
+The two current endpoints allow you to:
 
 * filter the queryset on any variable value
-	* text fields using sql inexact case insensitive: 
+	* text fields using sql inexact case insensitive:
 	* numeric fields using ranges [lower,upper] (lower can == upper)
 	* e.g. voyage_dates__imp_arrival_at_port_of_dis_year=1810,1812
 * select only specific columns to return, e.g., selected_fields=voyage_dates__imp_arrival_at_port_of_dis_year,voyage_slaves_numbers__imp_total_num_slaves_disembarked
@@ -37,8 +81,9 @@ next up:
 
 For instance, try
 
-	GET http://127.0.0.1:8000/voyage/?voyage_ship_owner__name=Domingos%20Pacheco&selected_fields=voyage_ship_owner__name
-	GET http://127.0.0.1:8000/voyage/?selected_fields=voyage_dates__imp_arrival_at_port_of_dis_year,voyage_slaves_numbers__imp_total_num_slaves_disembarked&voyage_dates__imp_arrival_at_port_of_dis_year=1810,1812
+```
+GET http://127.0.0.1:8000/voyage/?selected_fields=voyage_ship,voyage_ship_owner&voyage_ship_owner__name=Domingos%20Pacheco
+```
 
 next up:
 
@@ -54,7 +99,9 @@ next up:
 
 For instance, try
 
-	GET http://127.0.0.1:8000/voyage/dataframes?voyage_dates__imp_arrival_at_port_of_dis_year=1810,1812&selected_fields=voyage_dates__imp_arrival_at_port_of_dis_year,voyage_slaves_numbers__imp_total_num_slaves_disembarked
+```
+GET http://127.0.0.1:8000/voyage/dataframes?voyage_dates__imp_arrival_at_port_of_dis_year=1810,1812
+```
 
 next up:
 
@@ -65,7 +112,7 @@ next up:
 	* alternatively, creative ways of adding to dataframes, like fetching one year at a time and updating the graph as you go....
 * experiment with caching
 
-## OPTIONS endpoint: OPTIONS http call to 127.0.0.1:8000/voyage/
+### OPTIONS endpoint: OPTIONS http call to 127.0.0.1:8000/voyage/
 
 Only one argument: hierarchical=True -- default is flat.
 
@@ -94,7 +141,7 @@ next up:
 	1. I'm using a purupose-built one.
 	1. Less data in it (voyages only)
 	1. Rendered a few fields numeric (dates that were string fields)
-1. My code here is not ideal, but the below documentation simply didn't yield good results. 
+1. My code here is not ideal, but the below documentation simply didn't yield good results.
 	1. Why I wrote my own options endpoint:
 		1. http://www.tomchristie.com/rest-framework-2-docs/topics/documenting-your-api#endpoint-documentation
 		1. https://www.django-rest-framework.org/api-guide/generic-views/#retrievemodelmixin

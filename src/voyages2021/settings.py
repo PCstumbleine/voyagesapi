@@ -96,10 +96,10 @@ WSGI_APPLICATION = 'voyages2021.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'USER': 'voyages',
+        'USER': 'root',
         'NAME': 'voyages',
-        'PASSWORD': 'Voyages2021!',
-        'HOST':'127.0.0.1',
+        'PASSWORD': 'voyages',
+        'HOST':'voyagesapi-mysql',
         'PORT':'3306'
     }
 }

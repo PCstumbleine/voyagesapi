@@ -132,7 +132,7 @@ def voyage_get(s,r,retrieve_all=False):
 	text_fields=[i for i in all_voyage_fields if 'CharField' in all_voyage_fields[i]['type']]
 	numeric_fields=[i for i in all_voyage_fields if i not in text_fields]
 	active_numeric_search_fields=[i for i in set(params).intersection(set(numeric_fields))]
-
+		
 	if len(active_numeric_search_fields)>0:
 
 		for field in active_numeric_search_fields:
@@ -142,7 +142,7 @@ def voyage_get(s,r,retrieve_all=False):
 			'{0}__{1}'.format(field, 'gte'): min
 			}
 		queryset=queryset.filter(**kwargs)
-
+	
 	active_text_search_fields=[i for i in set(params).intersection(set(text_fields))]
 	if len(active_text_search_fields)>0:
 		for field in active_text_search_fields:
@@ -150,7 +150,6 @@ def voyage_get(s,r,retrieve_all=False):
 			kwargs = {
 			'{0}__{1}'.format(field, 'icontains'): searchstring
 			}
-		#print(kwargs)
 		queryset=queryset.filter(**kwargs)
 
 
@@ -214,7 +213,15 @@ class VoyageDataFrames(generics.GenericAPIView):
 		times.append(time.time())
 		for d in output_dicts:
 			for k in final:
-				final[k].append(d[k])
+				#need a null value handler here -- this one is not great, I will grant
+				#but the serializer, on a nested field, will return an upstream null, which is hard to parse, e.g.:
+				##http://0.0.0.0:8000/voyage/dataframes?voyage_itinerary__imp_principal_region_slave_dis__region=Virginia&selected_fields=voyage_itinerary__imp_broad_region_voyage_begin__broad_region
+				##will get you a value like: {'voyage_itinerary__imp_broad_region_voyage_begin__broad_region': 'Europe'}
+				##but legit nulls come back like this too: {'voyage_itinerary__imp_broad_region_voyage_begin': None}
+				try:
+					final[k].append(d[k])
+				except:
+					final[k].append(None)
 		for i in range(1,len(times)):
 			print(times[i]-times[i-1])
 		return JsonResponse(final,safe=False)

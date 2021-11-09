@@ -1733,11 +1733,6 @@ class Voyage(models.Model):
 	related to: :class:`~voyages.apps.voyage.models.VoyageShipOwner`
 	related to: :class:`~voyages.apps.voyage.models.VoyageSources`
 	"""
-	all_dataset_objects = models.Manager()
-
-	# For legacy reasons, the default manager should only yield TAST voyages.
-	objects = VoyageDatasetManager(VoyageDataset.Transatlantic)
-	intra_american_objects = VoyageDatasetManager(VoyageDataset.IntraAmerican)
 
 	voyage_id = models.IntegerField("Voyage ID", unique=True)
 

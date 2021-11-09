@@ -14,34 +14,9 @@ from .serializers import *
 
 from .prefetch_settings import *
 
-##RECURSIVE DRILL-DOWN INTO A SCHEMA, GETS ALL ITS FIELDS, THEIR LABELS, AND DATATYPES
-def deserializer(schema,base_address,serializer):
-	try:
-		fields=serializer.fields.__dict__['fields']
-	except:
-		#this (unintelligently) handles through fields
-		fields=serializer.__dict__['child'].fields
-
-	for field in fields:
-		datatypestr=str(type(fields[field]))
-		if base_address!='':
-			address='__'.join([base_address,field])
-		else:
-			address=field
-		if 'SerializerMethodField' in datatypestr or 'SlugRelatedField' in datatypestr:
-			#this handles serializermethodfields
-			#(which I am storing in the "default" key)
-			label=fields[field].label
-			datatypestr=str(fields[field].__dict__['default'])
-			schema[address]={'type':datatypestr,'label':label}
-		elif 'serializer' in datatypestr:
-			#print(address)
-			schema=deserializer(schema,address,fields[field])
-		else:
-			label=fields[field].label
-			schema[address]={'type':datatypestr,'label':label}
-	return schema
-
+d=open('voyage/options.json','r')
+voyage_options=(json.loads(d.read()))
+d.close()
 
 ##flattener: https://stackoverflow.com/a/6027615
 import collections
@@ -65,29 +40,6 @@ def addlevel(thisdict,keychain,payload):
 	else:
 		thisdict[thiskey]=payload
 	return thisdict
-
-#GENERIC FUNCTION TO RUN A CUSTOMIZABLE OPTIONS CALL ON A SERIALIZER
-def generic_options(s,r):
-	#GETS A FLAT VERSION OF THE SCHEMA WITH DOUBLE-UNDERSCORES FOR NESTED RELATIONS
-	schema=deserializer({},base_address='',serializer=s.get_serializer())
-
-	#CAN, ON REQUEST, TURN THAT INTO A NESTED LIST
-	if 'hierarchical' in r.query_params:
-		if r.query_params['hierarchical'].lower() in ['true','1','y']:
-			hierarchical=True
-	else:
-			hierarchical=False
-
-	unwound={}
-	if hierarchical:
-		for i in schema:
-			payload=schema[i]
-			keychain=i.split('__')
-			key=keychain[0]
-			unwound=addlevel(unwound,keychain,payload)
-			#print("=++++++=\n",key,unwound,"\n=++++++=")
-		schema=unwound
-	return schema
 
 #GENERIC FUNCTION TO RUN A GET CALL ON VOYAGE-LIKE SERIALIZERS
 def voyage_get(s,r,retrieve_all=False):
@@ -127,8 +79,9 @@ def voyage_get(s,r,retrieve_all=False):
 	#now they are defined with a live call to the options endpoint
 	#right now I'm assuming only two types of field: text and numeric
 	#This live call slows things down, obviously, so it will be a good idea to have some caching in place
-	r=requests.options('http://127.0.0.1:8000/voyage/')
-	all_voyage_fields=json.loads(r.text)
+	#r=requests.options('http://127.0.0.1:8000/voyage/')
+	#all_voyage_fields=json.loads(r.text)
+	all_voyage_fields=voyage_options
 	text_fields=[i for i in all_voyage_fields if 'CharField' in all_voyage_fields[i]['type']]
 	numeric_fields=[i for i in all_voyage_fields if i not in text_fields]
 	active_numeric_search_fields=[i for i in set(params).intersection(set(numeric_fields))]
@@ -184,8 +137,7 @@ def voyage_get(s,r,retrieve_all=False):
 class VoyageList(generics.GenericAPIView):
 	serializer_class=VoyageSerializer
 	def options(self,request):
-		schema=generic_options(self,request)
-		return JsonResponse(schema,safe=False)
+		return JsonResponse(voyage_options,safe=False)
 	def get(self,request):
 		queryset,selected_query_fields=voyage_get(self,request)
 		read_serializer=VoyageSerializer(queryset,many=True,selected_fields=selected_query_fields)
@@ -195,13 +147,11 @@ class VoyageList(generics.GenericAPIView):
 class VoyageDataFrames(generics.GenericAPIView):
 	def get(self,request):
 		times=[]
+		print("FETCHING...")
 		times.append(time.time())
-		select_fields=request.GET['selected_fields'].split(',')
-		queryset,req_query_fields_IGNORE=voyage_get(self,request,retrieve_all=True)
+		queryset,selected_query_fields=voyage_get(self,request,retrieve_all=True)
 		times.append(time.time())
-		serialized=VoyageSerializer(queryset,many=True,selected_fields=select_fields).data
-		times.append(time.time())
-		serialized=json.loads(json.dumps(serialized))
+		serialized=VoyageSerializer(queryset,many=True,selected_fields=selected_query_fields).data
 		times.append(time.time())
 		output_dicts=[]
 		for i in serialized:
@@ -209,7 +159,7 @@ class VoyageDataFrames(generics.GenericAPIView):
 			output_dicts.append(flat_dictionary)
 		times.append(time.time())
 		dict_keys=[i for i in output_dicts[0].keys()]
-		final={k:[] for k in select_fields}
+		final={k:[] for k in selected_query_fields}
 		times.append(time.time())
 		for d in output_dicts:
 			for k in final:

@@ -97,7 +97,7 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'USER': 'root',
-        'NAME': 'voyages2021',
+        'NAME': 'voyages',
         'PASSWORD': 'voyages',
         'HOST':'voyagesapi-mysql',
         'PORT':'3306'

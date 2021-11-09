@@ -51,5 +51,6 @@ prefetch_tables=[
 'voyage_crew',
 'voyage_sources',
 'voyage_outcomes',
-'voyage_ship_owner'
+'voyage_ship_owner',
+'voyage_itinerary'
 ]

@@ -1,0 +1,50 @@
+NOV 11 -- the fetch times have increased substantially on the api.
+
+On the scatter app queries, I'm seeing a ~20% performance drop after implementing a nicely formalized field selector in the serializer.
+Interestingly, no real difference in the sunburst app queries.
+
+So we'll stick with the well-structured serializer for now, but I'm keeping an alternative, named "serializers_ugly.py" in there for now to retain that code.
+
+
+SCATTER
+--FANCY SERIALIZER
+voyagesapi-plotly    | http://voyagesapi-django:8000/voyage/dataframes?voyage_dates__imp_arrival_at_port_of_dis_year=1800,1810&selected_fields=voyage_dates__imp_arrival_at_port_of_dis_year,voyage_slaves_numbers__imp_total_num_slaves_embarked,voyage_itinerary__imp_port_voyage_begin__place
+voyagesapi-django     | FETCHING...
+voyagesapi-django     | 0.021659135818481445
+voyagesapi-django     | 96.08110189437866
+voyagesapi-django     | 2.1447038650512695
+voyagesapi-django     | 3.409385681152344e-05
+voyagesapi-plotly    | http://voyagesapi-django:8000/voyage/dataframes?voyage_dates__imp_arrival_at_port_of_dis_year=1800,1810&selected_fields=voyage_dates__imp_arrival_at_port_of_dis_year,voyage_slaves_numbers__imp_total_num_slaves_embarked,voyage_ship__imputed_nationality__label
+voyagesapi-django     | FETCHING...
+voyagesapi-django     | 0.005372285842895508
+voyagesapi-django     | 84.2519781589508
+voyagesapi-django     | 0.8354883193969727
+voyagesapi-django     | 2.1696090698242188e-05
+
+--UGLY SERIALIZER
+voyagesapi-plotly    | http://voyagesapi-django:8000/voyage/dataframes?voyage_dates__imp_arrival_at_port_of_dis_year=1800,1810&selected_fields=voyage_dates__imp_arrival_at_port_of_dis_year,voyage_slaves_numbers__imp_total_num_slaves_embarked,voyage_itinerary__imp_port_voyage_begin__place
+voyagesapi-django     | 0.004097700119018555
+voyagesapi-django     | 76.75560355186462
+voyagesapi-django     | 0.038030147552490234
+voyagesapi-django     | 1.3589859008789062e-05
+voyagesapi-plotly    | http://voyagesapi-django:8000/voyage/dataframes?voyage_dates__imp_arrival_at_port_of_dis_year=1800,1810&selected_fields=voyage_dates__imp_arrival_at_port_of_dis_year,voyage_slaves_numbers__imp_total_num_slaves_embarked,voyage_ship__imputed_nationality__label
+voyagesapi-django     | 0.004829883575439453
+voyagesapi-django     | 76.45226526260376
+voyagesapi-django     | 0.0406498908996582
+voyagesapi-django     | 3.123283386230469e-05
+
+
+SUNBURST
+--FANCY SERIALIZER
+voyagesapi-plotly    | http://voyagesapi-django:8000/voyage/dataframes?&voyage_dates__imp_arrival_at_port_of_dis_year=1800,1810&selected_fields=voyage_itinerary__imp_broad_region_voyage_begin__broad_region,voyage_itinerary__first_landing_region__region,voyage_itinerary__first_landing_place__place,voyage_slaves_numbers__imp_total_num_slaves_embarked
+voyagesapi-django     | 0.0026979446411132812
+voyagesapi-django     | 79.69693326950073
+voyagesapi-django     | 1.4129455089569092
+voyagesapi-django     | 3.62396240234375e-05
+
+--UGLY SERIALIZER
+voyagesapi-plotly    | http://voyagesapi-django:8000/voyage/dataframes?&voyage_dates__imp_arrival_at_port_of_dis_year=1800,1810&selected_fields=voyage_itinerary__imp_broad_region_voyage_begin__broad_region,voyage_itinerary__first_landing_region__region,voyage_itinerary__first_landing_place__place,voyage_slaves_numbers__imp_total_num_slaves_embarked
+voyagesapi-django     | 0.002157926559448242
+voyagesapi-django     | 80.37122011184692
+voyagesapi-django     | 0.08132076263427734
+voyagesapi-django     | 1.4781951904296875e-05

@@ -102,6 +102,7 @@ class Place(models.Model):
 
 
 # Voyage Groupings
+# check for mismatch in VoyageGroupings class
 class VoyageGroupings(models.Model):
 	"""
 	Labels for groupings names.

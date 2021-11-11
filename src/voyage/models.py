@@ -489,6 +489,7 @@ class VoyageItinerary(models.Model):
 		null=True,
 		blank=True,
 		on_delete=models.CASCADE)
+	# variable name should be changed from int_second_place_region_slave_landing to int_second_region_slave_landing.  	
 	int_second_place_region_slave_landing = models.ForeignKey(
 		'Region',
 		related_name="int_second_region_slave_landing",
